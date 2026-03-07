@@ -20,13 +20,13 @@
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   min-height: 100vh;
-  color: #e6edf3;
-  background: radial-gradient(circle at top left, #1b2540 0%, #0a0f1e 45%);
+  color: #dce5ee;
+  background: #0b1117;
 }
 
 .sidebar {
   padding: 2.5rem 2rem;
-  background: rgba(6, 12, 26, 0.85);
+  background: rgba(7, 12, 18, 0.9);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
@@ -85,7 +85,7 @@
 .sidebar-section h2 {
   margin-bottom: 0.5rem;
   font-size: 1.1rem;
-  color: #d2d9ff;
+  color: #cfe9e3;
 }
 
 .sidebar-section p {
@@ -122,7 +122,7 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: #8ab4ff;
+  color: #7ce3d7;
 }
 
 .contact-list {
@@ -140,7 +140,7 @@
 }
 
 .contact-list a {
-  color: #8ab4ff;
+  color: #87e8dc;
   word-break: break-all;
 }
 
@@ -222,14 +222,14 @@
 .prompt-line {
   font-family: 'Fira Code', 'SFMono-Regular', ui-monospace, SFMono-Regular,
     Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  color: #8ab4ff;
+  color: #87e8dc;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
 }
 
 .prompt {
-  color: #8ab4ff;
+  color: #87e8dc;
 }
 
 .prompt-symbol {
@@ -307,9 +307,9 @@
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
   font-size: 0.78rem;
-  background: rgba(14, 165, 233, 0.2);
-  color: #bae6fd;
-  border: 1px solid rgba(14, 165, 233, 0.4);
+  background: rgba(45, 212, 191, 0.18);
+  color: #baf4e9;
+  border: 1px solid rgba(45, 212, 191, 0.38);
 }
 
 .tag {
@@ -318,8 +318,8 @@
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   font-size: 0.75rem;
-  background: rgba(59, 130, 246, 0.25);
-  color: #bfdbfe;
+  background: rgba(52, 211, 153, 0.2);
+  color: #bff6de;
   white-space: nowrap;
 }
 
@@ -333,8 +333,8 @@
 .download-button {
   padding: 0.4rem 0.9rem;
   border-radius: 999px;
-  background: #2563eb;
-  color: #fff;
+  background: #0f766e;
+  color: #ecfeff;
   font-size: 0.85rem;
   text-decoration: none;
 }
@@ -564,9 +564,9 @@
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
   font-size: 0.78rem;
-  background: rgba(14, 165, 233, 0.2);
-  color: #bae6fd;
-  border: 1px solid rgba(14, 165, 233, 0.4);
+  background: rgba(45, 212, 191, 0.18);
+  color: #baf4e9;
+  border: 1px solid rgba(45, 212, 191, 0.38);
 }
 
 .classes-list {

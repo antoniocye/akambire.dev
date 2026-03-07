@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Pi icon">
+  <rect width="128" height="128" rx="24" fill="#0b1117" />
+  <text
+    x="64"
+    y="86"
+    text-anchor="middle"
+    font-family="'Cambria Math', 'Times New Roman', serif"
+    font-size="86"
+    font-weight="700"
+    fill="#7ce3d7"
+  >
+    À
+  </text>
+</svg>
