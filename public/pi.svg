@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Pi icon">
-  <rect width="128" height="128" rx="24" fill="#1d2021" />
+  <rect width="128" height="128" rx="24" fill="#1f2430" />
   <text
     x="64"
     y="86"
@@ -7,7 +7,7 @@
     font-family="'Cambria Math', 'Times New Roman', serif"
     font-size="86"
     font-weight="700"
-    fill="#b8bb26"
+    fill="#5ccfe6"
   >
     &#960;
   </text>

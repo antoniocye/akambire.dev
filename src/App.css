@@ -1,18 +1,20 @@
 :root {
-  --gb-dark0-hard: #1d2021;
-  --gb-dark0: #282828;
-  --gb-dark0-soft: #32302f;
-  --gb-dark1: #3c3836;
-  --gb-dark2: #504945;
-  --gb-dark3: #665c54;
-  --gb-light0: #fbf1c7;
-  --gb-light1: #ebdbb2;
-  --gb-light3: #bdae93;
-  --gb-light4: #a89984;
-  --gb-bright-red: #fb4934;
-  --gb-bright-green: #b8bb26;
-  --gb-bright-yellow: #fabd2f;
-  --gb-neutral-green: #98971a;
+  --gb-dark0-hard: #1f2430;
+  --gb-dark0: #242936;
+  --gb-dark0-soft: #2a3142;
+  --gb-dark1: #333a4d;
+  --gb-dark2: #46506a;
+  --gb-dark3: #6c7891;
+  --gb-light0: #f3f4f5;
+  --gb-light1: #cccac2;
+  --gb-light3: #8a919f;
+  --gb-light4: #707a8c;
+  --gb-bright-red: #f28779;
+  --gb-bright-green: #d5ff80;
+  --gb-bright-yellow: #ffd173;
+  --gb-neutral-green: #aad94c;
+  --gb-bright-cyan: #5ccfe6;
+  --gb-bright-orange: #ffad66;
 
   --bg-page: var(--gb-dark0-hard);
   --bg-sidebar: var(--gb-dark0);
@@ -25,10 +27,10 @@
   --text: var(--gb-light1);
   --text-muted: var(--gb-light3);
   --text-faint: var(--gb-light4);
-  --accent: var(--gb-bright-green);
-  --accent-strong: var(--gb-neutral-green);
+  --accent: var(--gb-bright-cyan);
+  --accent-strong: var(--gb-bright-orange);
   --accent-soft: var(--gb-dark1);
-  --accent-soft-border: var(--gb-dark3);
+  --accent-soft-border: var(--gb-bright-cyan);
   --accent-chip-text: var(--gb-light0);
   --success: var(--gb-bright-yellow);
   --shadow-elevated: none;
@@ -315,7 +317,7 @@
   border-radius: var(--radius-md);
   padding: 1.25rem;
   border: 1px solid var(--border-subtle);
-  border-left: 3px solid var(--gb-dark3);
+  border-left: 3px solid var(--accent-strong);
   display: grid;
   gap: 1rem;
 }
@@ -346,7 +348,7 @@
 }
 
 .project-card:hover {
-  border-color: var(--gb-dark3);
+  border-color: var(--accent-soft-border);
   background: var(--gb-dark1);
 }
 
@@ -394,8 +396,8 @@
 }
 
 .project-links a:hover {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
   color: var(--bg-page);
 }
 
@@ -468,7 +470,7 @@
 
 .hobby-card:focus,
 .hobby-card:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-soft-border);
   background: var(--gb-dark1);
   outline: none;
 }
@@ -509,8 +511,8 @@
 }
 
 .view-meme-btn:hover {
-  background: var(--gb-dark1);
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-border);
 }
 
 .view-meme-btn-card {
@@ -599,7 +601,7 @@
 }
 
 .hobby-modal-header button:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-soft-border);
   background: var(--gb-dark1);
 }
 
@@ -644,7 +646,7 @@
 }
 
 .work-list article:hover {
-  border-color: var(--gb-dark3);
+  border-color: var(--accent-soft-border);
   background: var(--gb-dark1);
 }
 
@@ -697,7 +699,7 @@
 }
 
 .awards-list article:hover {
-  border-color: var(--gb-dark3);
+  border-color: var(--accent-soft-border);
   background: var(--gb-dark1);
 }
 
@@ -751,8 +753,8 @@
 }
 
 .awards-links a:hover {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
   color: var(--bg-page);
 }
 
@@ -785,7 +787,7 @@
 }
 
 .classes-list article:hover {
-  border-color: var(--gb-dark3);
+  border-color: var(--accent-soft-border);
   background: var(--gb-dark1);
 }
 
