@@ -1,22 +1,37 @@
 :root {
-  --bg-page: #1d2021;
-  --bg-sidebar: #282828;
-  --bg-panel: #1d2021;
-  --bg-surface: #282828;
-  --bg-elevated: #32302f;
-  --bg-overlay: rgba(29, 32, 33, 0.88);
-  --border: #504945;
-  --border-subtle: rgba(80, 73, 69, 0.82);
-  --text: #ebdbb2;
-  --text-muted: #bdae93;
-  --text-faint: #928374;
-  --accent: #b8bb26;
-  --accent-strong: #98971a;
-  --accent-soft: rgba(184, 187, 38, 0.2);
-  --accent-soft-border: rgba(184, 187, 38, 0.45);
-  --accent-chip-text: #fbf1c7;
-  --success: #fabd2f;
-  --shadow-elevated: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --gb-dark0-hard: #1d2021;
+  --gb-dark0: #282828;
+  --gb-dark0-soft: #32302f;
+  --gb-dark1: #3c3836;
+  --gb-dark2: #504945;
+  --gb-dark3: #665c54;
+  --gb-light0: #fbf1c7;
+  --gb-light1: #ebdbb2;
+  --gb-light3: #bdae93;
+  --gb-light4: #a89984;
+  --gb-bright-red: #fb4934;
+  --gb-bright-green: #b8bb26;
+  --gb-bright-yellow: #fabd2f;
+  --gb-neutral-green: #98971a;
+
+  --bg-page: var(--gb-dark0-hard);
+  --bg-sidebar: var(--gb-dark0);
+  --bg-panel: var(--gb-dark0-hard);
+  --bg-surface: var(--gb-dark0);
+  --bg-elevated: var(--gb-dark0-soft);
+  --bg-overlay: var(--gb-dark0-hard);
+  --border: var(--gb-dark2);
+  --border-subtle: var(--gb-dark2);
+  --text: var(--gb-light1);
+  --text-muted: var(--gb-light3);
+  --text-faint: var(--gb-light4);
+  --accent: var(--gb-bright-green);
+  --accent-strong: var(--gb-neutral-green);
+  --accent-soft: var(--gb-dark1);
+  --accent-soft-border: var(--gb-dark3);
+  --accent-chip-text: var(--gb-light0);
+  --success: var(--gb-bright-yellow);
+  --shadow-elevated: none;
 }
 
 @keyframes popout {
@@ -196,15 +211,15 @@
 }
 
 .dot.red {
-  background: #ff5f56;
+  background: var(--gb-bright-red);
 }
 
 .dot.yellow {
-  background: #ffbd2e;
+  background: var(--gb-bright-yellow);
 }
 
 .dot.green {
-  background: #27c93f;
+  background: var(--gb-bright-green);
 }
 
 .terminal-title {
@@ -422,7 +437,7 @@
 }
 
 .view-meme-btn {
-  background: rgba(40, 40, 40, 0.82);
+  background: var(--gb-dark0);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -433,7 +448,7 @@
 }
 
 .view-meme-btn:hover {
-  background: rgba(184, 187, 38, 0.2);
+  background: var(--gb-dark1);
   border-color: var(--accent);
 }
 
