@@ -1,22 +1,22 @@
 :root {
-  --bg-page: #090d09;
-  --bg-sidebar: #0d120d;
-  --bg-panel: #090d09;
-  --bg-surface: #101610;
-  --bg-elevated: #151d15;
-  --bg-overlay: rgba(2, 4, 2, 0.86);
-  --border: #2a352a;
-  --border-subtle: rgba(42, 53, 42, 0.82);
-  --text: #d4e7d1;
-  --text-muted: #9ab39a;
-  --text-faint: #6f846f;
-  --accent: #7ee787;
-  --accent-strong: #3fb950;
-  --accent-soft: rgba(126, 231, 135, 0.16);
-  --accent-soft-border: rgba(126, 231, 135, 0.38);
-  --accent-chip-text: #dcffd8;
-  --success: #e3b341;
-  --shadow-elevated: 0 8px 28px rgba(0, 0, 0, 0.55);
+  --bg-page: #1d2021;
+  --bg-sidebar: #282828;
+  --bg-panel: #1d2021;
+  --bg-surface: #282828;
+  --bg-elevated: #32302f;
+  --bg-overlay: rgba(29, 32, 33, 0.88);
+  --border: #504945;
+  --border-subtle: rgba(80, 73, 69, 0.82);
+  --text: #ebdbb2;
+  --text-muted: #bdae93;
+  --text-faint: #928374;
+  --accent: #b8bb26;
+  --accent-strong: #98971a;
+  --accent-soft: rgba(184, 187, 38, 0.2);
+  --accent-soft-border: rgba(184, 187, 38, 0.45);
+  --accent-chip-text: #fbf1c7;
+  --success: #fabd2f;
+  --shadow-elevated: 0 8px 28px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes popout {
@@ -352,7 +352,7 @@
   padding: 0.4rem 0.9rem;
   border-radius: 999px;
   background: var(--accent-strong);
-  color: #ffffff;
+  color: var(--bg-page);
   font-size: 0.85rem;
   text-decoration: none;
 }
@@ -422,7 +422,7 @@
 }
 
 .view-meme-btn {
-  background: rgba(9, 13, 9, 0.78);
+  background: rgba(40, 40, 40, 0.82);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -433,7 +433,7 @@
 }
 
 .view-meme-btn:hover {
-  background: rgba(31, 111, 235, 0.22);
+  background: rgba(184, 187, 38, 0.2);
   border-color: var(--accent);
 }
 
@@ -764,7 +764,7 @@
   margin-left: auto;
   margin-right: auto;
   background: var(--accent-strong);
-  color: #ffffff;
+  color: var(--bg-page);
   border: none;
   border-radius: 6px;
   padding: 6px 18px;
