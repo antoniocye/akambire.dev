@@ -1,22 +1,22 @@
 :root {
-  --bg-page: #0d1117;
-  --bg-sidebar: #161b22;
-  --bg-panel: #0d1117;
-  --bg-surface: #161b22;
-  --bg-elevated: #21262d;
-  --bg-overlay: rgba(13, 17, 23, 0.82);
-  --border: #30363d;
-  --border-subtle: rgba(48, 54, 61, 0.82);
-  --text: #c9d1d9;
-  --text-muted: #8b949e;
-  --text-faint: #6e7681;
-  --accent: #2f81f7;
-  --accent-strong: #1f6feb;
-  --accent-soft: rgba(47, 129, 247, 0.16);
-  --accent-soft-border: rgba(47, 129, 247, 0.35);
-  --accent-chip-text: #cddfff;
-  --success: #3fb950;
-  --shadow-elevated: 0 8px 28px rgba(1, 4, 9, 0.45);
+  --bg-page: #090d09;
+  --bg-sidebar: #0d120d;
+  --bg-panel: #090d09;
+  --bg-surface: #101610;
+  --bg-elevated: #151d15;
+  --bg-overlay: rgba(2, 4, 2, 0.86);
+  --border: #2a352a;
+  --border-subtle: rgba(42, 53, 42, 0.82);
+  --text: #d4e7d1;
+  --text-muted: #9ab39a;
+  --text-faint: #6f846f;
+  --accent: #7ee787;
+  --accent-strong: #3fb950;
+  --accent-soft: rgba(126, 231, 135, 0.16);
+  --accent-soft-border: rgba(126, 231, 135, 0.38);
+  --accent-chip-text: #dcffd8;
+  --success: #e3b341;
+  --shadow-elevated: 0 8px 28px rgba(0, 0, 0, 0.55);
 }
 
 @keyframes popout {
@@ -422,8 +422,8 @@
 }
 
 .view-meme-btn {
-  background: rgba(1, 4, 9, 0.7);
-  color: #f0f6fc;
+  background: rgba(9, 13, 9, 0.78);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 2px 10px;
