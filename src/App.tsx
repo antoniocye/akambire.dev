@@ -491,34 +491,20 @@ function App() {
                               }
                             }}
                           >
-                            <div className="hobby-image" style={{ position: 'relative', width: '100%', height: '120px', overflow: 'hidden', borderRadius: '8px', background: '#eee' }}>
+                            <div className="hobby-image hobby-image-card">
                               {hobby.image ? (
                                 <>
                                   <img
                                     src={hobby.image}
                                     alt={hobby.title}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                                    className="hobby-image-media"
                                   />
                                   <button
                                     type="button"
-                                    className="view-meme-btn"
-                                    style={{
-                                      position: 'absolute',
-                                      bottom: '8px',
-                                      right: '8px',
-                                      background: 'rgba(0,0,0,0.7)',
-                                      color: '#fff',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      padding: '2px 10px',
-                                      fontSize: '0.85rem',
-                                      cursor: 'pointer',
-                                      zIndex: 2,
-                                      transition: 'background 0.2s',
-                                    }}
+                                    className="view-meme-btn view-meme-btn-card"
                                     onClick={e => {
-                                      e.stopPropagation();
-                                      setExpandedImage({ src: hobby.image!, alt: hobby.title });
+                                      e.stopPropagation()
+                                      setExpandedImage({ src: hobby.image!, alt: hobby.title })
                                     }}
                                   >
                                     View meme
@@ -669,26 +655,15 @@ function App() {
               </button>
             </div>
             {activeHobby.image && (
-              <div style={{ width: '100%', maxHeight: '180px', overflow: 'hidden', borderRadius: '10px', marginBottom: '1rem', background: '#eee', position: 'relative' }}>
-                <img src={activeHobby.image} alt={activeHobby.title} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '10px', display: 'block' }} />
+              <div className="hobby-modal-image-wrap">
+                <img
+                  src={activeHobby.image}
+                  alt={activeHobby.title}
+                  className="hobby-modal-image"
+                />
                 <button
                   type="button"
-                  className="view-meme-btn"
-                  style={{
-                    position: 'absolute',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    bottom: '10px',
-                    background: 'rgba(0,0,0,0.7)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '2px 14px',
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                    zIndex: 2,
-                    transition: 'background 0.2s',
-                  }}
+                  className="view-meme-btn view-meme-btn-centered"
                   onClick={() => setExpandedImage({ src: activeHobby.image!, alt: activeHobby.title })}
                 >
                   View meme
@@ -710,57 +685,20 @@ function App() {
       {expandedImage && (
         <div
           className="expanded-meme-backdrop"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.7)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
           onClick={() => setExpandedImage(null)}
         >
           <div
             className="expanded-meme-content"
-            style={{
-              background: '#fff',
-              borderRadius: '16px',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-              padding: '1.5rem',
-              animation: 'popout 0.25s cubic-bezier(.5,1.8,.5,1)'
-            }}
             onClick={e => e.stopPropagation()}
           >
             <img
               src={expandedImage.src}
               alt={expandedImage.alt}
-              style={{
-                maxWidth: '70vw',
-                maxHeight: '70vh',
-                borderRadius: '12px',
-                display: 'block',
-                margin: '0 auto',
-              }}
+              className="expanded-meme-image"
             />
             <button
               type="button"
-              style={{
-                marginTop: '1rem',
-                display: 'block',
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                background: '#222',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '6px 18px',
-                fontSize: '1rem',
-                cursor: 'pointer',
-              }}
+              className="expanded-meme-close-button"
               onClick={() => setExpandedImage(null)}
             >
               Close
