@@ -166,14 +166,14 @@ const awards: Array<{
 
 const classes = {
   cs: [
-    { code: 'CS 355 (II)', name: 'Advanced Topics in Cryptography', term: 'Spring 2026'},
+    { code: 'CS 355', name: 'Advanced Topics in Cryptography', term: 'Spring 2026'},
     { code: 'CS 240LX', name: 'Advanced Systems Laboratory, Accelerated', term: 'Spring 2026'},
     { code: 'CS 140E', name: 'Operating systems design and implementation', term: 'Winter 2026'},
     { code: 'CS 356', name: 'Topics in Computer and Network Security', term: 'Fall 2025' },
     { code: 'CS 251', name: 'Cryptocurrencies and blockchain technologies', term: 'Fall 2025' },
     { code: 'CS 258', name: 'Quantum Cryptography', term: 'Fall 2025' },
     { code: 'CS 155', name: 'Computer and Network Security', term: 'Spring 2025' },
-    { code: 'CS 355 (I)', name: 'Advanced Topics in Cryptography: Zero-Knowledge Proofs', term: 'Spring 2025' },
+    { code: 'CS 355', name: 'Zero-Knowledge Proofs', term: 'Spring 2025' },
     { code: 'CS 255', name: 'Introduction to Cryptography', term: 'Winter 2025' },
     { code: 'CS 229', name: 'Machine Learning', term: 'Winter 2025' },
     { code: 'CS 161', name: 'Design and Analysis of Algorithms', term: 'Fall 2024' },
