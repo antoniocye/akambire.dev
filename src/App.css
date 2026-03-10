@@ -1139,6 +1139,9 @@
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
+  /* reset <a> defaults when rendered as Link */
+  text-decoration: none;
+  color: inherit;
   background: transparent;
   border: 1.5px solid transparent;
   cursor: pointer;
@@ -1231,6 +1234,7 @@
 .finder-path-link {
   color: var(--text-muted);
   cursor: pointer;
+  text-decoration: none;
   transition: color var(--transition-fast);
 }
 
@@ -1491,8 +1495,10 @@
   color: var(--text-muted);
   border: 1px solid var(--border);
   cursor: pointer;
+  text-decoration: none;
   transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .finder-back-btn:hover {
@@ -1814,12 +1820,23 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* Floating fullscreen toggle button — fixed at top-right of viewport */
-.blog-fsbtn {
-  position: fixed;
+/* Sticky zero-height anchor that pins the expand button to the top-right
+   of the blog post content area — sits above the article without affecting layout */
+.blog-fsbtn-anchor {
+  position: sticky;
   top: 1rem;
-  right: 1.5rem;
-  z-index: 50;
+  height: 0;
+  overflow: visible;
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 1.25rem;
+  pointer-events: none;
+}
+
+/* Shared visual style for both expand and collapse buttons */
+.blog-fsbtn {
+  pointer-events: all;
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm);
@@ -1837,13 +1854,16 @@
   background: var(--bg-hover);
   color: var(--accent);
   border-color: var(--accent-soft-border);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
+/* Exit button lives in the portal above the fullscreen overlay */
 .blog-fsbtn-exit {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.5rem;
   z-index: 201;
   background: var(--bg-surface);
-  border-color: var(--border);
 }
 
 .blog-fsbtn-icon {
@@ -1858,13 +1878,24 @@
   font-size: 1em;
 }
 
+/* Block (display) math centering.
+   rehype-katex wraps display math in .math.math-display and KaTeX adds
+   .katex-display inside. Both levels need text-align: center. */
+.blog-post-content .math.math-display,
+.blog-fullscreen-overlay .math.math-display {
+  display: block !important;
+  text-align: center !important;
+  overflow-x: auto;
+  margin: 1.1em 0;
+}
+
 .blog-post-content .katex-display,
 .blog-fullscreen-overlay .katex-display {
-  display: block;
-  text-align: center;
+  display: block !important;
+  text-align: center !important;
   overflow-x: auto;
-  margin: 1em 0;
-  padding: 0.25em 0;
+  margin: 0;
+  padding: 0.2em 0;
   color: var(--text);
 }
 

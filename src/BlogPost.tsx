@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -43,7 +43,6 @@ function PostContent({ content }: { content: string }) {
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>()
-  const navigate = useNavigate()
   const [fullscreen, setFullscreen] = useState(false)
 
   const post = useMemo(() => allPosts.find((p) => p.slug === slug), [slug])
@@ -57,9 +56,7 @@ export default function BlogPost() {
             <span className="dot yellow" />
             <span className="dot green" />
           </div>
-          <button className="finder-back-btn" onClick={() => navigate('/blog')} type="button">
-            ← Back
-          </button>
+          <Link to="/blog" className="finder-back-btn">← Back</Link>
         </header>
         <div className="blog-post-body">
           <p className="blog-not-found">Post not found: <code>{slug}</code></p>
@@ -97,46 +94,39 @@ export default function BlogPost() {
             <span className="dot yellow" />
             <span className="dot green" />
           </div>
-          <button className="finder-back-btn" onClick={() => navigate('/blog')} type="button">
-            ← Blog
-          </button>
+          <Link to="/blog" className="finder-back-btn">← Blog</Link>
           <div className="finder-breadcrumb">
             <span className="finder-path-segment">akambire.dev</span>
             <span className="finder-path-sep">›</span>
-            <span
-              className="finder-path-segment finder-path-link"
-              onClick={() => navigate('/blog')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter') navigate('/blog') }}
-            >
-              blog
-            </span>
+            <Link to="/blog" className="finder-path-segment finder-path-link">blog</Link>
             <span className="finder-path-sep">›</span>
             <span className="finder-path-segment finder-path-active">{post.slug}.md</span>
           </div>
         </header>
 
         <div className="blog-post-body">
+          {/* Zero-height sticky anchor: keeps the expand button at the top-right
+              of the article viewport as you scroll, without affecting layout */}
+          {!fullscreen && (
+            <div className="blog-fsbtn-anchor" aria-hidden="true">
+              <button
+                className="blog-fsbtn"
+                onClick={() => setFullscreen(true)}
+                type="button"
+                title="Fullscreen view"
+                aria-label="Open in fullscreen"
+                aria-hidden="false"
+              >
+                <ExpandIcon />
+              </button>
+            </div>
+          )}
           <article className="blog-post-article">
             {postMeta}
             <PostContent content={post.content} />
           </article>
         </div>
       </div>
-
-      {/* Enter-fullscreen button: fixed at top-right of viewport, only shown when not in fullscreen */}
-      {!fullscreen && (
-        <button
-          className="blog-fsbtn"
-          onClick={() => setFullscreen(true)}
-          type="button"
-          title="Fullscreen view"
-          aria-label="Open in fullscreen"
-        >
-          <ExpandIcon />
-        </button>
-      )}
 
       {fullscreen && createPortal(
         <>
@@ -151,7 +141,7 @@ export default function BlogPost() {
               <PostContent content={post.content} />
             </article>
           </div>
-          {/* Exit-fullscreen button: fixed at top-right, above the overlay */}
+          {/* Exit button: fixed at top-right, above the fullscreen overlay */}
           <button
             className="blog-fsbtn blog-fsbtn-exit"
             onClick={() => setFullscreen(false)}

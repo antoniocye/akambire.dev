@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom'
+import { Routes, Route, useLocation, Link } from 'react-router-dom'
 import './App.css'
 import Finder from './Finder'
 import BlogPost from './BlogPost'
@@ -348,36 +348,31 @@ function FinderAppIcon({ active }: { active: boolean }) {
 
 function Dock() {
   const location = useLocation()
-  const navigate = useNavigate()
   const isTerminal = location.pathname === '/'
   const isBlog = location.pathname.startsWith('/blog')
 
   return (
     <nav className="dock" aria-label="App switcher">
       <div className="dock-inner">
-        <button
+        <Link
+          to="/"
           className={`dock-item${isTerminal ? ' dock-item-active' : ''}`}
-          onClick={() => navigate('/')}
-          type="button"
           title="Terminal"
           aria-current={isTerminal ? 'page' : undefined}
         >
           <TerminalIcon active={isTerminal} />
           <span className="dock-label">Terminal</span>
-          {isTerminal && <span className="dock-dot" aria-hidden="true" />}
-        </button>
+        </Link>
 
-        <button
+        <Link
+          to="/blog"
           className={`dock-item${isBlog ? ' dock-item-active' : ''}`}
-          onClick={() => navigate('/blog')}
-          type="button"
-          title="Blog (Finder)"
+          title="Blog"
           aria-current={isBlog ? 'page' : undefined}
         >
           <FinderAppIcon active={isBlog} />
           <span className="dock-label">Blog</span>
-          {isBlog && <span className="dock-dot" aria-hidden="true" />}
-        </button>
+        </Link>
       </div>
     </nav>
   )
