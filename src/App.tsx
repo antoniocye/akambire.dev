@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { blogPosts, findBlogPostBySlug, sortBlogPosts, type BlogSort } from './blogPosts'
 import './App.css'
 
 type KnownCommand =
@@ -9,6 +12,7 @@ type KnownCommand =
   | 'work'
   | 'awards'
   | 'classes'
+  | 'ls'
   | 'clear'
   | 'theme'
 
@@ -25,6 +29,8 @@ type HistoryEntry = {
   id: string
   command: string
 }
+
+type AppView = 'terminal' | 'finder'
 
 const projects = [
   {
@@ -214,6 +220,7 @@ const KNOWN_COMMANDS: KnownCommand[] = [
   'work',
   'awards',
   'classes',
+  'ls',
   'clear',
   'theme',
 ]
@@ -227,12 +234,20 @@ const THEME_OPTIONS: ThemeScheme[] = [
   'green',
 ]
 
+const BLOG_SORT_OPTIONS: Array<{ label: string; value: BlogSort }> = [
+  { label: 'Recent first', value: 'recent' },
+  { label: 'Oldest first', value: 'oldest' },
+  { label: 'Name A-Z', value: 'name-asc' },
+  { label: 'Name Z-A', value: 'name-desc' },
+]
+
 const commandDescriptions: Record<KnownCommand, string> = {
   help: 'List available commands',
   projects: 'Show project cards',
   work: 'Show work experience',
   awards: 'Show awards',
   classes: 'Show coursework',
+  ls: 'List blog markdown files (click to open)',
   resume: 'Open resume viewer',
   hobbies: 'Show hobbies list',
   clear: 'Clear the terminal output',
@@ -276,10 +291,29 @@ const parseThemeCommand = (command: string): ParsedThemeCommand => {
   return { type: 'invalid', value: args.join(' ') }
 }
 
+const getRouteState = (): { view: AppView; postSlug: string | null } => {
+  if (typeof window === 'undefined') {
+    return { view: 'terminal', postSlug: null }
+  }
+
+  if (window.location.pathname.startsWith('/blog')) {
+    const params = new URLSearchParams(window.location.search)
+    return { view: 'finder', postSlug: params.get('post') }
+  }
+
+  return { view: 'terminal', postSlug: null }
+}
+
 function App() {
+  const initialRouteState = getRouteState()
   const [inputValue, setInputValue] = useState('')
   const [activeHobby, setActiveHobby] = useState<(typeof hobbies)[number] | null>(null)
   const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null)
+  const [activeApp, setActiveApp] = useState<AppView>(initialRouteState.view)
+  const [selectedBlogSlug, setSelectedBlogSlug] = useState<string | null>(
+    initialRouteState.postSlug,
+  )
+  const [blogSort, setBlogSort] = useState<BlogSort>('recent')
   const [theme, setTheme] = useState<ThemeScheme>(() => {
     if (typeof window === 'undefined') {
       return 'dark'
@@ -303,13 +337,22 @@ function App() {
     }
   })
   const terminalBodyRef = useRef<HTMLDivElement | null>(null)
+  const sortedBlogPosts = useMemo(() => sortBlogPosts(blogPosts, blogSort), [blogSort])
+  const selectedBlogPost = useMemo(
+    () => findBlogPostBySlug(selectedBlogSlug) ?? sortedBlogPosts[0] ?? null,
+    [selectedBlogSlug, sortedBlogPosts],
+  )
+  const blogFilesByName = useMemo(
+    () => sortBlogPosts(blogPosts, 'name-asc'),
+    [],
+  )
 
   const commandEntries = useMemo(() => {
     return history.map((entry) => {
       const normalized = entry.command.trim().toLowerCase()
       const [baseCommand = ''] = normalized.split(/\s+/)
       const isThemeCommand = baseCommand === 'theme'
-      const isKnown = isThemeCommand ? true : isKnownCommand(normalized)
+      const isKnown = isThemeCommand ? true : baseCommand === 'ls' || isKnownCommand(normalized)
       return {
         ...entry,
         normalized,
@@ -353,6 +396,48 @@ function App() {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme)
     }
   }, [theme])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const syncFromRoute = () => {
+      const routeState = getRouteState()
+      setActiveApp(routeState.view)
+      setSelectedBlogSlug(routeState.postSlug)
+    }
+
+    window.addEventListener('popstate', syncFromRoute)
+    return () => window.removeEventListener('popstate', syncFromRoute)
+  }, [])
+
+  const navigateToView = (view: AppView, postSlug: string | null = null) => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const targetPath = view === 'finder' ? '/blog' : '/'
+    const search = view === 'finder' && postSlug
+      ? `?post=${encodeURIComponent(postSlug)}`
+      : ''
+    const nextUrl = `${targetPath}${search}`
+
+    if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
+      window.history.pushState({}, '', nextUrl)
+    }
+
+    setActiveApp(view)
+    setSelectedBlogSlug(view === 'finder' ? postSlug : null)
+    if (view !== 'terminal') {
+      setActiveHobby(null)
+      setExpandedImage(null)
+    }
+  }
+
+  const openBlogPost = (slug: string) => {
+    navigateToView('finder', slug)
+  }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -452,276 +537,399 @@ function App() {
         </section>
       </aside>
 
-      <main className="terminal-panel">
-        <header className="terminal-header">
-          <div className="terminal-dots">
-            <span className="dot red" />
-            <span className="dot yellow" />
-            <span className="dot green" />
-          </div>
-          <div className="terminal-title">akambire.dev</div>
-        </header>
+      <main className={activeApp === 'terminal' ? 'terminal-panel' : 'finder-panel'}>
+        {activeApp === 'terminal' ? (
+          <>
+            <header className="terminal-header">
+              <div className="terminal-dots">
+                <span className="dot red" />
+                <span className="dot yellow" />
+                <span className="dot green" />
+              </div>
+              <div className="terminal-title">akambire.dev</div>
+            </header>
 
-        <div className="terminal-body" ref={terminalBodyRef}>
-          <div className="terminal-output">
-            {commandEntries.map((entry) => {
-              return (
-                <div key={entry.id} className="terminal-entry">
-                  <div className="prompt-line">
-                    <span className="prompt">akambire.dev</span>
-                    <span className="prompt-symbol">$</span>
-                    <span className="prompt-command">{entry.command}</span>
-                  </div>
+            <div className="terminal-body" ref={terminalBodyRef}>
+              <div className="terminal-output">
+                {commandEntries.map((entry) => {
+                  return (
+                    <div key={entry.id} className="terminal-entry">
+                      <div className="prompt-line">
+                        <span className="prompt">akambire.dev</span>
+                        <span className="prompt-symbol">$</span>
+                        <span className="prompt-command">{entry.command}</span>
+                      </div>
 
-                  {entry.baseCommand === 'help' && (
-                    <div className="command-output">
-                      <p className="command-title">Available commands</p>
-                      <ul>
-                        {Object.entries(commandDescriptions).map(
-                          ([command, description]) => (
-                            <li key={command}>
-                              <strong>{command}</strong> — {description}
-                            </li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
+                      {entry.baseCommand === 'help' && (
+                        <div className="command-output">
+                          <p className="command-title">Available commands</p>
+                          <ul>
+                            {Object.entries(commandDescriptions).map(
+                              ([command, description]) => (
+                                <li key={command}>
+                                  <strong>{command}</strong> — {description}
+                                </li>
+                              ),
+                            )}
+                          </ul>
+                        </div>
+                      )}
 
-                  {entry.baseCommand === 'projects' && (
-                    <div className="command-output">
-                      <p className="command-title">Selected Projects</p>
-                      <div className="project-grid">
-                        {projects.map((project) => (
-                          <article
-                            key={project.title}
-                            className="project-card"
-                          >
-                            <h3>{project.title}</h3>
-                            <p className="project-details">
-                              {project.description}
-                            </p>
-                            <div className="tag-list">
-                              {project.tags.map((tag) => (
-                                <span key={tag} className="tag">
-                                  {tag}
-                                </span>
+                      {entry.baseCommand === 'projects' && (
+                        <div className="command-output">
+                          <p className="command-title">Selected Projects</p>
+                          <div className="project-grid">
+                            {projects.map((project) => (
+                              <article
+                                key={project.title}
+                                className="project-card"
+                              >
+                                <h3>{project.title}</h3>
+                                <p className="project-details">
+                                  {project.description}
+                                </p>
+                                <div className="tag-list">
+                                  {project.tags.map((tag) => (
+                                    <span key={tag} className="tag">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                                {project.links && project.links.length > 0 && (
+                                  <div className="project-links">
+                                    {project.links.map((link) => (
+                                      <a
+                                        key={link.label}
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        {link.label}
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </article>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {entry.baseCommand === 'resume' && (
+                        <div className="command-output">
+                          <div className="resume-header">
+                            <p className="command-title">Resume</p>
+                            <a className="download-button" href="/resume.pdf" download>
+                              Download PDF
+                            </a>
+                          </div>
+                          <div className="resume-viewer">
+                            <object
+                              data="/resume.pdf"
+                              type="application/pdf"
+                              aria-label="Resume PDF"
+                            >
+                              <p>
+                                Your browser cannot display the PDF. Use the
+                                download button above.
+                              </p>
+                            </object>
+                          </div>
+                        </div>
+                      )}
+
+                      {entry.baseCommand === 'hobbies' && (
+                        <div className="command-output">
+                          <p className="command-title">Hobbies</p>
+                          <div className="hobby-grid">
+                            {hobbies.map((hobby) => (
+                              <article
+                                key={hobby.title}
+                                className="hobby-card"
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => setActiveHobby(hobby)}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault()
+                                    setActiveHobby(hobby)
+                                  }
+                                }}
+                              >
+                                <div className="hobby-image hobby-image-card">
+                                  {hobby.image ? (
+                                    <>
+                                      <img
+                                        src={hobby.image}
+                                        alt={hobby.title}
+                                        className="hobby-image-media"
+                                      />
+                                      <button
+                                        type="button"
+                                        className="view-meme-btn view-meme-btn-card"
+                                        onClick={e => {
+                                          e.stopPropagation()
+                                          setExpandedImage({ src: hobby.image!, alt: hobby.title })
+                                        }}
+                                      >
+                                        View meme
+                                      </button>
+                                    </>
+                                  ) : (
+                                    'Click to view'
+                                  )}
+                                </div>
+                                <div>
+                                  <h3>{hobby.title}</h3>
+                                  <p>{hobby.note}</p>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {entry.baseCommand === 'work' && (
+                        <div className="command-output">
+                          <p className="command-title">Work experience</p>
+                          {workExperiences.length === 0 ? (
+                            <p>Add your roles in the workExperiences list.</p>
+                          ) : (
+                            <div className="work-list">
+                              {workExperiences.map((role) => (
+                                <article key={`${role.role}-${role.org}`}>
+                                  <div className="work-heading">
+                                    <h3>{role.role}</h3>
+                                    <span>{role.org}</span>
+                                  </div>
+                                  <p className="work-period">{role.period}</p>
+                                  <ul>
+                                    {role.highlights.map((highlight) => (
+                                      <li key={highlight}>{highlight}</li>
+                                    ))}
+                                  </ul>
+                                </article>
                               ))}
                             </div>
-                            {project.links && project.links.length > 0 && (
-                              <div className="project-links">
-                                {project.links.map((link) => (
-                                  <a
-                                    key={link.label}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {link.label}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                          )}
+                        </div>
+                      )}
 
-                  {entry.baseCommand === 'resume' && (
-                    <div className="command-output">
-                      <div className="resume-header">
-                        <p className="command-title">Resume</p>
-                        <a className="download-button" href="/resume.pdf" download>
-                          Download PDF
-                        </a>
-                      </div>
-                      <div className="resume-viewer">
-                        <object
-                          data="/resume.pdf"
-                          type="application/pdf"
-                          aria-label="Resume PDF"
-                        >
-                          <p>
-                            Your browser cannot display the PDF. Use the
-                            download button above.
+                      {entry.baseCommand === 'awards' && (
+                        <div className="command-output">
+                          <p className="command-title">Awards</p>
+                          <div className="awards-list">
+                            {awards.map((award) => (
+                              <article key={`${award.title}-${award.year}`}>
+                                <div className="awards-heading">
+                                  <h3>{award.title}</h3>
+                                  <span>{award.year}</span>
+                                </div>
+                                <p className="awards-org">{award.org}</p>
+                                {award.details && (
+                                  <p className="awards-details">{award.details}</p>
+                                )}
+                                {award.links && award.links.length > 0 && (
+                                  <div className="awards-links">
+                                    {award.links.map((link) => (
+                                      <a
+                                        key={link.label}
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        {link.label}
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </article>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {entry.baseCommand === 'classes' && (
+                        <div className="command-output">
+                          <p className="command-title">Classes</p>
+                          <div className="classes-section">
+                            <h3>Computer Science</h3>
+                            <div className="classes-list">
+                              {classes.cs.map((course) => (
+                                <article key={`${course.code}-${course.term}`}>
+                                  <div className="classes-heading">
+                                    <h3>{course.code}</h3>
+                                    <span>{course.term}</span>
+                                  </div>
+                                  <p className="classes-name">{course.name}</p>
+                                </article>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="classes-section">
+                            <h3>Mathematics</h3>
+                            <div className="classes-list">
+                              {classes.math.map((course) => (
+                                <article key={`${course.code}-${course.term}`}>
+                                  <div className="classes-heading">
+                                    <h3>{course.code}</h3>
+                                    <span>{course.term}</span>
+                                  </div>
+                                  <p className="classes-name">{course.name}</p>
+                                </article>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {entry.baseCommand === 'ls' && (
+                        <div className="command-output">
+                          <p className="command-title">blog/</p>
+                          {blogFilesByName.length === 0 ? (
+                            <p>No markdown files found in src/content/blog.</p>
+                          ) : (
+                            <div className="ls-output">
+                              {blogFilesByName.map((post) => (
+                                <button
+                                  key={post.slug}
+                                  type="button"
+                                  className="ls-file-link"
+                                  onClick={() => openBlogPost(post.slug)}
+                                >
+                                  {post.fileName}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          <p className="terminal-helper">
+                            Click a file to open it in Finder at <strong>/blog</strong>.
                           </p>
-                        </object>
-                      </div>
-                    </div>
-                  )}
+                        </div>
+                      )}
 
-                  {entry.baseCommand === 'hobbies' && (
-                    <div className="command-output">
-                      <p className="command-title">Hobbies</p>
-                      <div className="hobby-grid">
-                        {hobbies.map((hobby) => (
-                          <article
-                            key={hobby.title}
-                            className="hobby-card"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => setActiveHobby(hobby)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter' || event.key === ' ') {
-                                event.preventDefault()
-                                setActiveHobby(hobby)
-                              }
-                            }}
-                          >
-                            <div className="hobby-image hobby-image-card">
-                              {hobby.image ? (
-                                <>
-                                  <img
-                                    src={hobby.image}
-                                    alt={hobby.title}
-                                    className="hobby-image-media"
-                                  />
-                                  <button
-                                    type="button"
-                                    className="view-meme-btn view-meme-btn-card"
-                                    onClick={e => {
-                                      e.stopPropagation()
-                                      setExpandedImage({ src: hobby.image!, alt: hobby.title })
-                                    }}
-                                  >
-                                    View meme
-                                  </button>
-                                </>
-                              ) : (
-                                'Click to view'
-                              )}
-                            </div>
-                            <div>
-                              <h3>{hobby.title}</h3>
-                              <p>{hobby.note}</p>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'work' && (
-                    <div className="command-output">
-                      <p className="command-title">Work experience</p>
-                      {workExperiences.length === 0 ? (
-                        <p>Add your roles in the workExperiences list.</p>
-                      ) : (
-                        <div className="work-list">
-                          {workExperiences.map((role) => (
-                            <article key={`${role.role}-${role.org}`}>
-                              <div className="work-heading">
-                                <h3>{role.role}</h3>
-                                <span>{role.org}</span>
-                              </div>
-                              <p className="work-period">{role.period}</p>
-                              <ul>
-                                {role.highlights.map((highlight) => (
-                                  <li key={highlight}>{highlight}</li>
-                                ))}
-                              </ul>
-                            </article>
-                          ))}
+                      {!entry.isKnown && (
+                        <div className="command-output">
+                          <p className="command-title">Command not found</p>
+                          <p>
+                            Type <strong>help</strong> to see the available commands.
+                          </p>
                         </div>
                       )}
                     </div>
-                  )}
+                  )
+                })}
+              </div>
 
-                  {entry.baseCommand === 'awards' && (
-                    <div className="command-output">
-                      <p className="command-title">Awards</p>
-                      <div className="awards-list">
-                        {awards.map((award) => (
-                          <article key={`${award.title}-${award.year}`}>
-                            <div className="awards-heading">
-                              <h3>{award.title}</h3>
-                              <span>{award.year}</span>
-                            </div>
-                            <p className="awards-org">{award.org}</p>
-                            {award.details && (
-                              <p className="awards-details">{award.details}</p>
-                            )}
-                            {award.links && award.links.length > 0 && (
-                              <div className="awards-links">
-                                {award.links.map((link) => (
-                                  <a
-                                    key={link.label}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {link.label}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </article>
-                        ))}
-                      </div>
+              <form className="terminal-input" onSubmit={handleSubmit}>
+                <span className="prompt">akambire.dev</span>
+                <span className="prompt-symbol">$</span>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(event) => setInputValue(event.target.value)}
+                  placeholder="Type a command (help, ls, projects, work, awards, classes, resume, hobbies, theme, clear)"
+                  aria-label="Terminal command input"
+                />
+              </form>
+            </div>
+          </>
+        ) : (
+          <>
+            <header className="finder-header">
+              <div className="terminal-dots">
+                <span className="dot red" />
+                <span className="dot yellow" />
+                <span className="dot green" />
+              </div>
+              <div className="terminal-title">Finder · /blog</div>
+              <label className="finder-sort-label">
+                Sort
+                <select
+                  value={blogSort}
+                  onChange={(event) => setBlogSort(event.target.value as BlogSort)}
+                >
+                  {BLOG_SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </header>
+
+            <div className="finder-body">
+              <aside className="finder-files-pane">
+                <p className="finder-pane-title">Blog files</p>
+                {sortedBlogPosts.length === 0 ? (
+                  <p className="finder-empty-message">
+                    Add markdown files in <code>src/content/blog</code>.
+                  </p>
+                ) : (
+                  <div className="finder-file-list">
+                    {sortedBlogPosts.map((post) => (
+                      <button
+                        key={post.slug}
+                        type="button"
+                        className={`finder-file ${selectedBlogPost?.slug === post.slug ? 'active' : ''}`}
+                        onClick={() => openBlogPost(post.slug)}
+                      >
+                        <span className="finder-file-icon" aria-hidden>
+                          📄
+                        </span>
+                        <span className="finder-file-name">{post.fileName}</span>
+                        <span className="finder-file-meta">{post.dateLabel}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </aside>
+
+              <section className="finder-preview-pane">
+                {selectedBlogPost ? (
+                  <article className="blog-post">
+                    <header className="blog-post-header">
+                      <h2>{selectedBlogPost.title}</h2>
+                      <p>{selectedBlogPost.dateLabel}</p>
+                    </header>
+                    <div className="markdown-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {selectedBlogPost.content}
+                      </ReactMarkdown>
                     </div>
-                  )}
-
-                  {entry.baseCommand === 'classes' && (
-                    <div className="command-output">
-                      <p className="command-title">Classes</p>
-                      <div className="classes-section">
-                        <h3>Computer Science</h3>
-                        <div className="classes-list">
-                          {classes.cs.map((course) => (
-                            <article key={`${course.code}-${course.term}`}>
-                              <div className="classes-heading">
-                                <h3>{course.code}</h3>
-                                <span>{course.term}</span>
-                              </div>
-                              <p className="classes-name">{course.name}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="classes-section">
-                        <h3>Mathematics</h3>
-                        <div className="classes-list">
-                          {classes.math.map((course) => (
-                            <article key={`${course.code}-${course.term}`}>
-                              <div className="classes-heading">
-                                <h3>{course.code}</h3>
-                                <span>{course.term}</span>
-                              </div>
-                              <p className="classes-name">{course.name}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {!entry.isKnown && (
-                    <div className="command-output">
-                      <p className="command-title">Command not found</p>
-                      <p>
-                        Type <strong>help</strong> to see the available commands.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          <form className="terminal-input" onSubmit={handleSubmit}>
-            <span className="prompt">akambire.dev</span>
-            <span className="prompt-symbol">$</span>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(event) => setInputValue(event.target.value)}
-              placeholder="Type a command (help, projects, work, awards, classes, resume, hobbies, theme, clear)"
-              aria-label="Terminal command input"
-            />
-          </form>
-        </div>
+                  </article>
+                ) : (
+                  <div className="finder-empty-state">
+                    <p>Select a markdown file to preview it here.</p>
+                  </div>
+                )}
+              </section>
+            </div>
+          </>
+        )}
       </main>
+      <nav className="app-dock" aria-label="Application dock">
+        <button
+          type="button"
+          className={`dock-app ${activeApp === 'terminal' ? 'active' : ''}`}
+          onClick={() => navigateToView('terminal')}
+        >
+          <span className="dock-icon" aria-hidden>
+            ⌨
+          </span>
+          Terminal
+        </button>
+        <button
+          type="button"
+          className={`dock-app ${activeApp === 'finder' ? 'active' : ''}`}
+          onClick={() => navigateToView('finder', selectedBlogPost?.slug ?? null)}
+        >
+          <span className="dock-icon" aria-hidden>
+            🗂
+          </span>
+          Finder
+        </button>
+      </nav>
       {activeHobby && (
         <div className="hobby-modal" role="dialog" aria-modal="true">
           <div className="hobby-modal-backdrop" onClick={() => setActiveHobby(null)} />

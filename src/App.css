@@ -215,6 +215,7 @@
   display: grid;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   min-height: 100vh;
+  padding-bottom: 84px;
   color: var(--text);
   background: var(--bg-page);
   font-family: var(--font-ui);
@@ -361,12 +362,17 @@
   color: var(--text-faint);
 }
 
-.terminal-panel {
+.terminal-panel,
+.finder-panel {
   display: flex;
   flex-direction: column;
   padding: 1.8rem;
   gap: 1.5rem;
   font-family: var(--font-mono);
+}
+
+.finder-panel {
+  padding-bottom: 2.4rem;
 }
 
 .terminal-header {
@@ -405,6 +411,185 @@
 .terminal-title {
   font-size: 0.95rem;
   color: var(--text-muted);
+}
+
+.finder-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-surface);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.finder-sort-label {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.finder-sort-label select {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.25rem 0.45rem;
+  font-family: var(--font-mono);
+}
+
+.finder-body {
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  min-height: 600px;
+  max-height: 70vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+}
+
+.finder-files-pane {
+  border-right: 1px solid var(--border);
+  padding: 1rem;
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+}
+
+.finder-pane-title {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.finder-file-list {
+  display: grid;
+  gap: 0.5rem;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 0.15rem;
+}
+
+.finder-file {
+  width: 100%;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text);
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.55rem;
+  cursor: pointer;
+}
+
+.finder-file:hover {
+  border-color: var(--accent-soft-border);
+  background: var(--bg-hover);
+}
+
+.finder-file.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 68%, var(--bg-elevated) 32%);
+}
+
+.finder-file-icon {
+  grid-row: 1 / span 2;
+}
+
+.finder-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.finder-file-meta {
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+.finder-preview-pane {
+  padding: 1.25rem;
+  overflow-y: auto;
+  min-height: 0;
+  background: var(--bg-panel);
+}
+
+.finder-empty-message,
+.finder-empty-state {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.finder-empty-message code {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 0.05rem 0.3rem;
+}
+
+.blog-post {
+  display: grid;
+  gap: 1rem;
+}
+
+.blog-post-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.blog-post-header p {
+  margin: 0.2rem 0 0;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.markdown-content {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  color: var(--text);
+}
+
+.markdown-content a {
+  color: var(--accent);
+}
+
+.markdown-content code {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 0.08rem 0.3rem;
+  font-size: 0.87em;
+}
+
+.markdown-content pre {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem;
+  overflow-x: auto;
+}
+
+.markdown-content pre code {
+  border: none;
+  padding: 0;
+  background: transparent;
 }
 
 .terminal-body {
@@ -1017,6 +1202,73 @@
   color: var(--text-faint);
 }
 
+.ls-output {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ls-file-link {
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.28rem 0.58rem;
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+.ls-file-link:hover {
+  border-color: var(--accent-soft-border);
+  background: var(--bg-hover);
+}
+
+.app-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  padding: 0.4rem 0.55rem;
+  z-index: 20;
+  box-shadow: var(--shadow-elevated);
+}
+
+.dock-app {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.dock-app:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.dock-app.active {
+  color: var(--text);
+  border-color: var(--accent-soft-border);
+  background: color-mix(in srgb, var(--accent-soft) 78%, transparent);
+}
+
+.dock-icon {
+  font-size: 0.9rem;
+}
+
 .expanded-meme-backdrop {
   position: fixed;
   inset: 0;
@@ -1066,13 +1318,51 @@
 @media (max-width: 900px) {
   .page {
     grid-template-columns: 1fr;
+    padding-bottom: 96px;
   }
 
-  .terminal-panel {
+  .terminal-panel,
+  .finder-panel {
     padding: 2rem 1.5rem 2.5rem;
   }
 
-  .terminal-body {
+  .terminal-body,
+  .finder-body {
     min-height: auto;
+    max-height: none;
+  }
+
+  .finder-body {
+    grid-template-columns: 1fr;
+  }
+
+  .finder-files-pane {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 280px;
+  }
+
+  .app-dock {
+    width: calc(100vw - 2rem);
+    justify-content: center;
+    bottom: 0.7rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .finder-header {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .finder-sort-label {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dock-app {
+    flex: 1;
+    justify-content: center;
   }
 }
