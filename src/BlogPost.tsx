@@ -15,7 +15,7 @@ const rehypePlugins = [rehypeKatex]
 
 function ExpandIcon() {
   return (
-    <svg viewBox="0 0 16 16" className="blog-fullscreen-icon" fill="none" aria-hidden="true">
+    <svg viewBox="0 0 16 16" className="blog-fsbtn-icon" fill="none" aria-hidden="true">
       <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5"
         stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -24,7 +24,7 @@ function ExpandIcon() {
 
 function CollapseIcon() {
   return (
-    <svg viewBox="0 0 16 16" className="blog-fullscreen-icon" fill="none" aria-hidden="true">
+    <svg viewBox="0 0 16 16" className="blog-fsbtn-icon" fill="none" aria-hidden="true">
       <path d="M6 1v5H1M15 6h-5V1M10 15v-5h5M1 10h5v5"
         stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -115,15 +115,6 @@ export default function BlogPost() {
             <span className="finder-path-sep">›</span>
             <span className="finder-path-segment finder-path-active">{post.slug}.md</span>
           </div>
-          <button
-            className="blog-fullscreen-btn"
-            onClick={() => setFullscreen(true)}
-            type="button"
-            title="Fullscreen view"
-            aria-label="Open in fullscreen"
-          >
-            <ExpandIcon />
-          </button>
         </header>
 
         <div className="blog-post-body">
@@ -134,27 +125,43 @@ export default function BlogPost() {
         </div>
       </div>
 
+      {/* Enter-fullscreen button: fixed at top-right of viewport, only shown when not in fullscreen */}
+      {!fullscreen && (
+        <button
+          className="blog-fsbtn"
+          onClick={() => setFullscreen(true)}
+          type="button"
+          title="Fullscreen view"
+          aria-label="Open in fullscreen"
+        >
+          <ExpandIcon />
+        </button>
+      )}
+
       {fullscreen && createPortal(
-        <div className="blog-fullscreen-overlay" role="dialog" aria-modal="true" aria-label={post.title}>
-          <div className="blog-fullscreen-header">
-            <button
-              className="blog-fullscreen-close"
-              onClick={() => setFullscreen(false)}
-              type="button"
-            >
-              <CollapseIcon />
-              Exit fullscreen
-            </button>
-            <span className="blog-fullscreen-sep" aria-hidden="true" />
-            <span className="blog-fullscreen-title">{post.title}</span>
-          </div>
-          <div className="blog-fullscreen-body">
+        <>
+          <div
+            className="blog-fullscreen-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label={post.title}
+          >
             <article className="blog-post-article">
               {postMeta}
               <PostContent content={post.content} />
             </article>
           </div>
-        </div>,
+          {/* Exit-fullscreen button: fixed at top-right, above the overlay */}
+          <button
+            className="blog-fsbtn blog-fsbtn-exit"
+            onClick={() => setFullscreen(false)}
+            type="button"
+            title="Exit fullscreen"
+            aria-label="Exit fullscreen"
+          >
+            <CollapseIcon />
+          </button>
+        </>,
         document.body
       )}
     </>

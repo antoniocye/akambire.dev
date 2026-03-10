@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { loadBlogPosts, formatSize, formatDate } from './blogUtils'
+import { loadBlogPosts, formatDate } from './blogUtils'
 
-type SortKey = 'date' | 'name' | 'size'
+type SortKey = 'date' | 'name'
 type SortDir = 'asc' | 'desc'
 
 const allPosts = loadBlogPosts()
@@ -19,10 +19,9 @@ export default function Finder() {
   const sorted = useMemo(() => {
     const copy = [...allPosts]
     copy.sort((a, b) => {
-      let cmp = 0
-      if (sortKey === 'date') cmp = a.date.localeCompare(b.date)
-      else if (sortKey === 'name') cmp = a.title.localeCompare(b.title)
-      else cmp = a.sizeBytes - b.sizeBytes
+      const cmp = sortKey === 'date'
+        ? a.date.localeCompare(b.date)
+        : a.title.localeCompare(b.title)
       return sortDir === 'asc' ? cmp : -cmp
     })
     return copy
@@ -55,7 +54,7 @@ export default function Finder() {
       <div className="finder-body">
         <div className="finder-toolbar">
           <span className="finder-toolbar-label">Sort by</span>
-          {(['name', 'date', 'size'] as SortKey[]).map((key) => (
+          {(['name', 'date'] as SortKey[]).map((key) => (
             <button
               key={key}
               className={`finder-sort-btn${sortKey === key ? ' active' : ''}`}
@@ -112,7 +111,7 @@ export default function Finder() {
                 )}
               </span>
               <span className="finder-col-date">{formatDate(post.date)}</span>
-              <span className="finder-col-size">{formatSize(post.sizeBytes)}</span>
+              <span className="finder-col-size">{post.date.slice(0, 4)}</span>
             </button>
           ))}
 

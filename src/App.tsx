@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom'
 import './App.css'
 import Finder from './Finder'
@@ -411,6 +411,15 @@ function App() {
   })
   const terminalBodyRef = useRef<HTMLDivElement | null>(null)
 
+  // Ref callback: when the terminal body DOM node is mounted (including when
+  // returning from the blog view), scroll to show the last command entry.
+  const mountTerminalBody = useCallback((node: HTMLDivElement | null) => {
+    terminalBodyRef.current = node
+    if (node) {
+      node.scrollTop = node.scrollHeight
+    }
+  }, [])
+
   const commandEntries = useMemo(() => {
     return history.map((entry) => {
       const normalized = entry.command.trim().toLowerCase()
@@ -575,7 +584,7 @@ function App() {
                     <div className="terminal-title">akambire.dev</div>
                   </header>
 
-                  <div className="terminal-body" ref={terminalBodyRef}>
+                  <div className="terminal-body" ref={mountTerminalBody}>
                     <div className="terminal-output">
                       {commandEntries.map((entry) => {
                         return (

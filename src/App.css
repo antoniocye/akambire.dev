@@ -1131,11 +1131,7 @@
 .dock-inner {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 0.35rem 0.5rem;
+  gap: 1.25rem;
 }
 
 .dock-item {
@@ -1799,133 +1795,77 @@
   inset: 0;
   z-index: 200;
   background: var(--bg-page);
-  display: flex;
-  flex-direction: column;
-  animation: blog-fs-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes blog-fs-in {
-  from { opacity: 0; transform: scale(0.98); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.blog-fullscreen-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.65rem 1.5rem;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.blog-fullscreen-close {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-family: var(--font-ui);
-  font-weight: 500;
-  background: var(--bg-elevated);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.blog-fullscreen-close:hover {
-  background: var(--bg-hover);
-  color: var(--accent);
-  border-color: var(--accent-soft-border);
-}
-
-.blog-fullscreen-sep {
-  width: 1px;
-  height: 1.1em;
-  background: var(--border-subtle);
-  flex-shrink: 0;
-}
-
-.blog-fullscreen-title {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  font-family: var(--font-ui);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-
-.blog-fullscreen-body {
-  flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--gb-dark3) var(--bg-page);
+  animation: blog-fs-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.blog-fullscreen-body::-webkit-scrollbar { width: 8px; }
-.blog-fullscreen-body::-webkit-scrollbar-track { background: var(--bg-page); }
-.blog-fullscreen-body::-webkit-scrollbar-thumb {
+.blog-fullscreen-overlay::-webkit-scrollbar { width: 8px; }
+.blog-fullscreen-overlay::-webkit-scrollbar-track { background: var(--bg-page); }
+.blog-fullscreen-overlay::-webkit-scrollbar-thumb {
   background: var(--gb-dark3);
   border-radius: 999px;
   border: 2px solid var(--bg-page);
 }
 
-.blog-fullscreen-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-faint);
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-left: auto;
-  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+@keyframes blog-fs-in {
+  from { opacity: 0; transform: scale(0.985); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-.blog-fullscreen-btn:hover {
+/* Floating fullscreen toggle button — fixed at top-right of viewport */
+.blog-fsbtn {
+  position: fixed;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 50;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.blog-fsbtn:hover {
   background: var(--bg-hover);
   color: var(--accent);
   border-color: var(--accent-soft-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }
 
-.blog-fullscreen-icon {
-  width: 13px;
-  height: 13px;
+.blog-fsbtn-exit {
+  z-index: 201;
+  background: var(--bg-surface);
+  border-color: var(--border);
 }
 
-/* KaTeX math theming */
-.blog-post-content .math,
-.blog-post-content .math-display,
-.blog-fullscreen-body .math,
-.blog-fullscreen-body .math-display {
-  color: var(--text);
+.blog-fsbtn-icon {
+  width: 14px;
+  height: 14px;
 }
 
-.blog-post-content .math-display,
-.blog-fullscreen-body .math-display {
-  overflow-x: auto;
-  padding: 0.75rem 0;
-  text-align: center;
-  scrollbar-width: thin;
-}
-
+/* KaTeX math theming — applies in both normal and fullscreen contexts */
 .blog-post-content .katex,
-.blog-fullscreen-body .katex {
+.blog-fullscreen-overlay .katex {
   color: var(--text);
   font-size: 1em;
 }
 
 .blog-post-content .katex-display,
-.blog-fullscreen-body .katex-display {
-  margin: 0.5em 0;
+.blog-fullscreen-overlay .katex-display {
+  display: block;
+  text-align: center;
+  overflow-x: auto;
+  margin: 1em 0;
+  padding: 0.25em 0;
+  color: var(--text);
 }
 
 @media (max-width: 640px) {
