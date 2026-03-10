@@ -12,7 +12,7 @@ type KnownCommand =
   | 'clear'
   | 'theme'
 
-type ThemeScheme = 'dark' | 'light' | 'purple'
+type ThemeScheme = 'dark' | 'light' | 'purple' | 'red' | 'blue' | 'green'
 
 type ParsedThemeCommand =
   | { type: 'help' }
@@ -218,7 +218,14 @@ const KNOWN_COMMANDS: KnownCommand[] = [
   'theme',
 ]
 
-const THEME_OPTIONS: ThemeScheme[] = ['dark', 'light', 'purple']
+const THEME_OPTIONS: ThemeScheme[] = [
+  'dark',
+  'light',
+  'purple',
+  'red',
+  'blue',
+  'green',
+]
 
 const commandDescriptions: Record<KnownCommand, string> = {
   help: 'List available commands',
@@ -229,7 +236,7 @@ const commandDescriptions: Record<KnownCommand, string> = {
   resume: 'Open resume viewer',
   hobbies: 'Show hobbies list',
   clear: 'Clear the terminal output',
-  theme: 'Personalize colors: theme [light|dark|purple|toggle|current]',
+  theme: 'Personalize colors: theme [light|dark|purple|red|blue|green|toggle]',
 }
 
 const buildEmail = (user: string, domain: string) => `${user}@${domain}`
@@ -251,7 +258,10 @@ const isThemeScheme = (value: string): value is ThemeScheme =>
 const parseThemeCommand = (command: string): ParsedThemeCommand => {
   const tokens = command.trim().toLowerCase().split(/\s+/)
   const args = tokens.slice(1)
-  if (args.length === 0 || args[0] === 'help' || args[0] === 'list') {
+  if (args.length === 0) {
+    return { type: 'toggle' }
+  }
+  if (args[0] === 'help' || args[0] === 'list') {
     return { type: 'help' }
   }
   if (args[0] === 'current' || args.join(' ') === 'current theme') {
@@ -305,10 +315,6 @@ function App() {
         normalized,
         baseCommand,
         isKnown,
-        parsedThemeCommand:
-          isThemeCommand
-            ? parseThemeCommand(normalized)
-            : null,
       }
     })
   }, [history])
@@ -367,7 +373,11 @@ function App() {
         setTheme(parsedThemeCommand.theme)
       }
       if (parsedThemeCommand.type === 'toggle') {
-        setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'))
+        setTheme((prevTheme) => {
+          const currentIndex = THEME_OPTIONS.indexOf(prevTheme)
+          const nextIndex = (currentIndex + 1) % THEME_OPTIONS.length
+          return THEME_OPTIONS[nextIndex]
+        })
       }
     }
 
@@ -475,59 +485,6 @@ function App() {
                           ),
                         )}
                       </ul>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'theme' && (
-                    <div className="command-output">
-                      <p className="command-title">Personalization</p>
-                      {entry.parsedThemeCommand?.type === 'set' && (
-                        <p>
-                          Theme switched to <strong>{entry.parsedThemeCommand.theme}</strong>.
-                        </p>
-                      )}
-                      {entry.parsedThemeCommand?.type === 'toggle' && (
-                        <p>
-                          Toggled theme. Current theme is <strong>{theme}</strong>.
-                        </p>
-                      )}
-                      {entry.parsedThemeCommand?.type === 'current' && (
-                        <p>
-                          Current theme: <strong>{theme}</strong>.
-                        </p>
-                      )}
-                      {entry.parsedThemeCommand?.type === 'help' && (
-                        <>
-                          <p>Pick a color scheme for the site:</p>
-                          <ul>
-                            <li>
-                              <strong>theme light</strong> — switch to light mode
-                            </li>
-                            <li>
-                              <strong>theme dark</strong> — switch to dark mode
-                            </li>
-                            <li>
-                              <strong>theme purple</strong> — switch to purple mode
-                            </li>
-                            <li>
-                              <strong>theme toggle</strong> — toggle light/dark
-                            </li>
-                            <li>
-                              <strong>theme current</strong> — show active theme
-                            </li>
-                          </ul>
-                          <p>
-                            Your preference is saved automatically for your next visit.
-                          </p>
-                        </>
-                      )}
-                      {entry.parsedThemeCommand?.type === 'invalid' && (
-                        <p>
-                          Unknown theme option{' '}
-                          <strong>{entry.parsedThemeCommand.value || '(empty)'}</strong>. Try{' '}
-                          <strong>theme help</strong>.
-                        </p>
-                      )}
                     </div>
                   )}
 
