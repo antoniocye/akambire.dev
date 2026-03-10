@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom'
 import './App.css'
+import Finder from './Finder'
+import BlogPost from './BlogPost'
+import { loadBlogPosts, formatSize, formatLsDate } from './blogUtils'
 
 type KnownCommand =
   | 'help'
@@ -11,6 +15,7 @@ type KnownCommand =
   | 'classes'
   | 'clear'
   | 'theme'
+  | 'ls'
 
 type ThemeScheme = 'dark' | 'light' | 'purple' | 'red' | 'blue' | 'green'
 
@@ -49,12 +54,12 @@ const projects = [
       `Conducted a large scale study of 'phantom' dependencies in npm and PyPI and evaluated how these
 packages are exposed to a version downgrade attack that we introduced. The analysis covered >12,000 packages and uncovered that >23% of the top 1000 downloaded packages in
 npm may be vulnerable.`,
-    tags: ['software-supply-chain', 
+    tags: ['software-supply-chain',
       'dependency-analysis',
       'python',
       'js'
     ],
-    links: [{label: "GitHub Repo", url: "https://github.com/antoniocye/cs356"}],
+    links: [{ label: "GitHub Repo", url: "https://github.com/antoniocye/cs356" }],
   },
   {
     title: 'Snails Image Classification Project',
@@ -62,7 +67,7 @@ npm may be vulnerable.`,
       `Built an end-to-end pipeline to classify snail images, including dataset prep, model training, evaluation, and a web application prototype for real-time inference.
       This would allow dam-builders to quickly recognize potentially disease-carrying snails (based on species) during early prospection without needing a human expert on site. `,
     tags: ['image-classification', 'disease-ecology', 'python', 'js'],
-    links: [{label: "Poster", url: "https://github.com/antoniocye/de-leo-snails/blob/main/Poster.pdf"}, {label: "Demo", url: "snailsproject2024.web.app"}, {label: "GitHub Repo", url: "https://github.com/antoniocye/de-leo-snails"}],
+    links: [{ label: "Poster", url: "https://github.com/antoniocye/de-leo-snails/blob/main/Poster.pdf" }, { label: "Demo", url: "snailsproject2024.web.app" }, { label: "GitHub Repo", url: "https://github.com/antoniocye/de-leo-snails" }],
   },
 ]
 
@@ -73,7 +78,7 @@ const hobbies = [
     image: '/music.png',
     items: [
       { title: 'Good Kid, m.A.A.d City', detail: 'Kendrick Lamar (2012)' },
-      { title: 'Liquid Swords', detail: "GZA (1995)"},
+      { title: 'Liquid Swords', detail: "GZA (1995)" },
       { title: 'DAYTONA', detail: 'Pusha T (2018)' },
       { title: 'Ipséité', detail: 'Damso (2017)' },
       { title: 'Illmatic', detail: 'Nas (1994)' },
@@ -112,37 +117,37 @@ const workExperiences: Array<{
   period: string
   highlights: string[]
 }> = [
-  {
-    role: "Cryptography Research Intern",
-    org: "zkSecurity",
-    period: "Incoming - Summer 2026",
-    highlights: ["Will work on fun cryptography projects!"]
-  },
-  {
-    role: "Section Leader",
-    org: "Computer Science Department",
-    period: "Sept. 2024 - Present",
-    highlights: ["Course assistant for CS 106A and 106B classes at Stanford",
-      "Teaching C++ and Python sections to a dozen students, helping students debug during office hours, and grading assignments and exams."]
-  },
-  {
-    role: "Olympiad Coach",
-    org: "Mathematical Community of Burkina",
-    period: "Aug. 2020 - Present",
-    highlights: [
-      "Taught classes in number theory from a cryptography perspective to selected students.",
-      "Led the national team of Burkina to: Silver/Bronze medals in PAMO 2025 and a Bronze medal in PAMO 2024.",
-      "Served as a deputy leader for the team to IMO 2023 in Japan."
-    ]
-  },
-  {
-    role: "Junior Counselor",
-    org: "Canada/USA Mathcamp",
-    period: "June 2025 - Aug. 2025",
-    highlights: ["Taught a class on the Groth16 zero-knowledge proof system to mathematically gifted high school students.",
-      "Served as a residential advisor, helped run day-to-day camp operations, and led activities and field trips."]
-  }
-]
+    {
+      role: "Cryptography Research Intern",
+      org: "zkSecurity",
+      period: "Incoming - Summer 2026",
+      highlights: ["Will work on fun cryptography projects!"]
+    },
+    {
+      role: "Section Leader",
+      org: "Computer Science Department",
+      period: "Sept. 2024 - Present",
+      highlights: ["Course assistant for CS 106A and 106B classes at Stanford",
+        "Teaching C++ and Python sections to a dozen students, helping students debug during office hours, and grading assignments and exams."]
+    },
+    {
+      role: "Olympiad Coach",
+      org: "Mathematical Community of Burkina",
+      period: "Aug. 2020 - Present",
+      highlights: [
+        "Taught classes in number theory from a cryptography perspective to selected students.",
+        "Led the national team of Burkina to: Silver/Bronze medals in PAMO 2025 and a Bronze medal in PAMO 2024.",
+        "Served as a deputy leader for the team to IMO 2023 in Japan."
+      ]
+    },
+    {
+      role: "Junior Counselor",
+      org: "Canada/USA Mathcamp",
+      period: "June 2025 - Aug. 2025",
+      highlights: ["Taught a class on the Groth16 zero-knowledge proof system to mathematically gifted high school students.",
+        "Served as a residential advisor, helped run day-to-day camp operations, and led activities and field trips."]
+    }
+  ]
 
 const awards: Array<{
   title: string
@@ -151,34 +156,34 @@ const awards: Array<{
   details?: string
   links?: Array<{ label: string; url: string }>
 }> = [
-  {
-    title: 'TreeHacks Winner',
-    org: 'TreeHacks @ Stanford',
-    year: '2026',
-    details: 'Won the Y Combinator challenge at TreeHacks 2026.',
-    links: [{label: "Devpost", url: "https://devpost.com/software/evolve-browser"}]
-  },
-  {
-    title: 'Rise Fellow',
-    org: 'Rise',
-    year: '2023',
-    details: 'Recipitient of the Rise Fellowship, with a full-ride scholarship at Stanford, and a network of hundreds of talented people from around the world.',
-    links: [{label: "Rise Website", url: "https://www.risefortheworld.org/global-winners"}]
-  },
-  {
-    title: 'Atlas Fellow',
-    org: 'Atlas',
-    year: '2022',
-    details: '2022 Atlas Fellow',
-    links: [{label: "Atlas Website", url: "https://www.atlasfellowship.org/"}]
-  },
-]
+    {
+      title: 'TreeHacks Winner',
+      org: 'TreeHacks @ Stanford',
+      year: '2026',
+      details: 'Won the Y Combinator challenge at TreeHacks 2026.',
+      links: [{ label: "Devpost", url: "https://devpost.com/software/evolve-browser" }]
+    },
+    {
+      title: 'Rise Fellow',
+      org: 'Rise',
+      year: '2023',
+      details: 'Recipitient of the Rise Fellowship, with a full-ride scholarship at Stanford, and a network of hundreds of talented people from around the world.',
+      links: [{ label: "Rise Website", url: "https://www.risefortheworld.org/global-winners" }]
+    },
+    {
+      title: 'Atlas Fellow',
+      org: 'Atlas',
+      year: '2022',
+      details: '2022 Atlas Fellow',
+      links: [{ label: "Atlas Website", url: "https://www.atlasfellowship.org/" }]
+    },
+  ]
 
 const classes = {
   cs: [
-    { code: 'CS 355', name: 'Advanced Topics in Cryptography', term: 'Spring 2026'},
-    { code: 'CS 240LX', name: 'Advanced Systems Laboratory, Accelerated', term: 'Spring 2026'},
-    { code: 'CS 140E', name: 'Operating systems design and implementation', term: 'Winter 2026'},
+    { code: 'CS 355', name: 'Advanced Topics in Cryptography', term: 'Spring 2026' },
+    { code: 'CS 240LX', name: 'Advanced Systems Laboratory, Accelerated', term: 'Spring 2026' },
+    { code: 'CS 140E', name: 'Operating systems design and implementation', term: 'Winter 2026' },
     { code: 'CS 356', name: 'Topics in Computer and Network Security', term: 'Fall 2025' },
     { code: 'CS 251', name: 'Cryptocurrencies and blockchain technologies', term: 'Fall 2025' },
     { code: 'CS 258', name: 'Quantum Cryptography', term: 'Fall 2025' },
@@ -216,6 +221,7 @@ const KNOWN_COMMANDS: KnownCommand[] = [
   'classes',
   'clear',
   'theme',
+  'ls',
 ]
 
 const THEME_OPTIONS: ThemeScheme[] = [
@@ -235,6 +241,7 @@ const commandDescriptions: Record<KnownCommand, string> = {
   classes: 'Show coursework',
   resume: 'Open resume viewer',
   hobbies: 'Show hobbies list',
+  ls: 'List blog posts — click any filename to open it',
   clear: 'Clear the terminal output',
   theme: 'Personalize colors: theme [light|dark|purple|red|blue|green|toggle]',
 }
@@ -274,6 +281,75 @@ const parseThemeCommand = (command: string): ParsedThemeCommand => {
     return { type: 'set', theme: args[0] }
   }
   return { type: 'invalid', value: args.join(' ') }
+}
+
+const blogPosts = loadBlogPosts()
+
+function TerminalIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 44 44" className={`dock-app-icon${active ? ' dock-app-icon-active' : ''}`} aria-hidden="true">
+      <rect width="44" height="44" rx="10" fill="var(--bg-elevated)" stroke="var(--border)" strokeWidth="1" />
+      <polyline
+        points="10,16 19,22 10,28"
+        stroke="var(--accent)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <line x1="22" y1="28" x2="35" y2="28" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function FinderAppIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 44 44" className={`dock-app-icon${active ? ' dock-app-icon-active' : ''}`} aria-hidden="true">
+      <rect width="44" height="44" rx="10" fill="var(--bg-elevated)" stroke="var(--border)" strokeWidth="1" />
+      <rect x="8" y="18" width="28" height="18" rx="3" fill="var(--accent)" fillOpacity="0.25" stroke="var(--accent)" strokeWidth="1" strokeOpacity="0.5" />
+      <path d="M8 18 L8 16 Q8 14 10 14 L20 14 L22 18Z" fill="var(--accent)" fillOpacity="0.45" />
+      <line x1="13" y1="24" x2="32" y2="24" stroke="var(--accent)" strokeWidth="1.5" strokeOpacity="0.65" strokeLinecap="round" />
+      <line x1="13" y1="28" x2="27" y2="28" stroke="var(--accent)" strokeWidth="1.5" strokeOpacity="0.45" strokeLinecap="round" />
+      <line x1="13" y1="32" x2="22" y2="32" stroke="var(--accent)" strokeWidth="1.5" strokeOpacity="0.3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function Dock() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isTerminal = location.pathname === '/'
+  const isBlog = location.pathname.startsWith('/blog')
+
+  return (
+    <nav className="dock" aria-label="App switcher">
+      <div className="dock-inner">
+        <button
+          className={`dock-item${isTerminal ? ' dock-item-active' : ''}`}
+          onClick={() => navigate('/')}
+          type="button"
+          title="Terminal"
+          aria-current={isTerminal ? 'page' : undefined}
+        >
+          <TerminalIcon active={isTerminal} />
+          <span className="dock-label">Terminal</span>
+          {isTerminal && <span className="dock-dot" aria-hidden="true" />}
+        </button>
+
+        <button
+          className={`dock-item${isBlog ? ' dock-item-active' : ''}`}
+          onClick={() => navigate('/blog')}
+          type="button"
+          title="Blog (Finder)"
+          aria-current={isBlog ? 'page' : undefined}
+        >
+          <FinderAppIcon active={isBlog} />
+          <span className="dock-label">Blog</span>
+          {isBlog && <span className="dock-dot" aria-hidden="true" />}
+        </button>
+      </div>
+    </nav>
+  )
 }
 
 function App() {
@@ -452,276 +528,318 @@ function App() {
         </section>
       </aside>
 
-      <main className="terminal-panel">
-        <header className="terminal-header">
-          <div className="terminal-dots">
-            <span className="dot red" />
-            <span className="dot yellow" />
-            <span className="dot green" />
-          </div>
-          <div className="terminal-title">akambire.dev</div>
-        </header>
+      <div className="app-column">
+        <div className="app-view">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <main className="terminal-panel">
+                  <header className="terminal-header">
+                    <div className="terminal-dots">
+                      <span className="dot red" />
+                      <span className="dot yellow" />
+                      <span className="dot green" />
+                    </div>
+                    <div className="terminal-title">akambire.dev</div>
+                  </header>
 
-        <div className="terminal-body" ref={terminalBodyRef}>
-          <div className="terminal-output">
-            {commandEntries.map((entry) => {
-              return (
-                <div key={entry.id} className="terminal-entry">
-                  <div className="prompt-line">
-                    <span className="prompt">akambire.dev</span>
-                    <span className="prompt-symbol">$</span>
-                    <span className="prompt-command">{entry.command}</span>
+                  <div className="terminal-body" ref={terminalBodyRef}>
+                    <div className="terminal-output">
+                      {commandEntries.map((entry) => {
+                        return (
+                          <div key={entry.id} className="terminal-entry">
+                            <div className="prompt-line">
+                              <span className="prompt">akambire.dev</span>
+                              <span className="prompt-symbol">$</span>
+                              <span className="prompt-command">{entry.command}</span>
+                            </div>
+
+                            {entry.baseCommand === 'help' && (
+                              <div className="command-output">
+                                <p className="command-title">Available commands</p>
+                                <ul>
+                                  {Object.entries(commandDescriptions).map(
+                                    ([command, description]) => (
+                                      <li key={command}>
+                                        <strong>{command}</strong> — {description}
+                                      </li>
+                                    ),
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+
+                            {entry.baseCommand === 'projects' && (
+                              <div className="command-output">
+                                <p className="command-title">Selected Projects</p>
+                                <div className="project-grid">
+                                  {projects.map((project) => (
+                                    <article
+                                      key={project.title}
+                                      className="project-card"
+                                    >
+                                      <h3>{project.title}</h3>
+                                      <p className="project-details">
+                                        {project.description}
+                                      </p>
+                                      <div className="tag-list">
+                                        {project.tags.map((tag) => (
+                                          <span key={tag} className="tag">
+                                            {tag}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      {project.links && project.links.length > 0 && (
+                                        <div className="project-links">
+                                          {project.links.map((link) => (
+                                            <a
+                                              key={link.label}
+                                              href={link.url}
+                                              target="_blank"
+                                              rel="noreferrer"
+                                            >
+                                              {link.label}
+                                            </a>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </article>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {entry.baseCommand === 'resume' && (
+                              <div className="command-output">
+                                <div className="resume-header">
+                                  <p className="command-title">Resume</p>
+                                  <a className="download-button" href="/resume.pdf" download>
+                                    Download PDF
+                                  </a>
+                                </div>
+                                <div className="resume-viewer">
+                                  <object
+                                    data="/resume.pdf"
+                                    type="application/pdf"
+                                    aria-label="Resume PDF"
+                                  >
+                                    <p>
+                                      Your browser cannot display the PDF. Use the
+                                      download button above.
+                                    </p>
+                                  </object>
+                                </div>
+                              </div>
+                            )}
+
+                            {entry.baseCommand === 'hobbies' && (
+                              <div className="command-output">
+                                <p className="command-title">Hobbies</p>
+                                <div className="hobby-grid">
+                                  {hobbies.map((hobby) => (
+                                    <article
+                                      key={hobby.title}
+                                      className="hobby-card"
+                                      role="button"
+                                      tabIndex={0}
+                                      onClick={() => setActiveHobby(hobby)}
+                                      onKeyDown={(event) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                          event.preventDefault()
+                                          setActiveHobby(hobby)
+                                        }
+                                      }}
+                                    >
+                                      <div className="hobby-image hobby-image-card">
+                                        {hobby.image ? (
+                                          <>
+                                            <img
+                                              src={hobby.image}
+                                              alt={hobby.title}
+                                              className="hobby-image-media"
+                                            />
+                                            <button
+                                              type="button"
+                                              className="view-meme-btn view-meme-btn-card"
+                                              onClick={e => {
+                                                e.stopPropagation()
+                                                setExpandedImage({ src: hobby.image!, alt: hobby.title })
+                                              }}
+                                            >
+                                              View meme
+                                            </button>
+                                          </>
+                                        ) : (
+                                          'Click to view'
+                                        )}
+                                      </div>
+                                      <div>
+                                        <h3>{hobby.title}</h3>
+                                        <p>{hobby.note}</p>
+                                      </div>
+                                    </article>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {entry.baseCommand === 'work' && (
+                              <div className="command-output">
+                                <p className="command-title">Work experience</p>
+                                {workExperiences.length === 0 ? (
+                                  <p>Add your roles in the workExperiences list.</p>
+                                ) : (
+                                  <div className="work-list">
+                                    {workExperiences.map((role) => (
+                                      <article key={`${role.role}-${role.org}`}>
+                                        <div className="work-heading">
+                                          <h3>{role.role}</h3>
+                                          <span>{role.org}</span>
+                                        </div>
+                                        <p className="work-period">{role.period}</p>
+                                        <ul>
+                                          {role.highlights.map((highlight) => (
+                                            <li key={highlight}>{highlight}</li>
+                                          ))}
+                                        </ul>
+                                      </article>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {entry.baseCommand === 'awards' && (
+                              <div className="command-output">
+                                <p className="command-title">Awards</p>
+                                <div className="awards-list">
+                                  {awards.map((award) => (
+                                    <article key={`${award.title}-${award.year}`}>
+                                      <div className="awards-heading">
+                                        <h3>{award.title}</h3>
+                                        <span>{award.year}</span>
+                                      </div>
+                                      <p className="awards-org">{award.org}</p>
+                                      {award.details && (
+                                        <p className="awards-details">{award.details}</p>
+                                      )}
+                                      {award.links && award.links.length > 0 && (
+                                        <div className="awards-links">
+                                          {award.links.map((link) => (
+                                            <a
+                                              key={link.label}
+                                              href={link.url}
+                                              target="_blank"
+                                              rel="noreferrer"
+                                            >
+                                              {link.label}
+                                            </a>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </article>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {entry.baseCommand === 'classes' && (
+                              <div className="command-output">
+                                <p className="command-title">Classes</p>
+                                <div className="classes-section">
+                                  <h3>Computer Science</h3>
+                                  <div className="classes-list">
+                                    {classes.cs.map((course) => (
+                                      <article key={`${course.code}-${course.term}`}>
+                                        <div className="classes-heading">
+                                          <h3>{course.code}</h3>
+                                          <span>{course.term}</span>
+                                        </div>
+                                        <p className="classes-name">{course.name}</p>
+                                      </article>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="classes-section">
+                                  <h3>Mathematics</h3>
+                                  <div className="classes-list">
+                                    {classes.math.map((course) => (
+                                      <article key={`${course.code}-${course.term}`}>
+                                        <div className="classes-heading">
+                                          <h3>{course.code}</h3>
+                                          <span>{course.term}</span>
+                                        </div>
+                                        <p className="classes-name">{course.name}</p>
+                                      </article>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {entry.baseCommand === 'ls' && (
+                              <div className="command-output">
+                                <div className="ls-output">
+                                  <div className="ls-total">
+                                    total {blogPosts.length}
+                                  </div>
+                                  {blogPosts.map((post) => (
+                                    <div key={post.slug} className="ls-row">
+                                      <span className="ls-permissions">-rw-r--r--</span>
+                                      <span className="ls-owner">akambire</span>
+                                      <span className="ls-size">{formatSize(post.sizeBytes)}</span>
+                                      <span className="ls-date">{formatLsDate(post.date)}</span>
+                                      <Link
+                                        to={`/blog/${post.slug}`}
+                                        className="ls-filename"
+                                      >
+                                        {post.slug}.md
+                                      </Link>
+                                    </div>
+                                  ))}
+                                  {blogPosts.length === 0 && (
+                                    <span className="ls-empty">No blog posts found in src/blog/</span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {!entry.isKnown && (
+                              <div className="command-output">
+                                <p className="command-title">Command not found</p>
+                                <p>
+                                  Type <strong>help</strong> to see the available commands.
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <form className="terminal-input" onSubmit={handleSubmit}>
+                      <span className="prompt">akambire.dev</span>
+                      <span className="prompt-symbol">$</span>
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(event) => setInputValue(event.target.value)}
+                        placeholder="help, projects, work, awards, classes, hobbies, ls, resume, theme, clear"
+                        aria-label="Terminal command input"
+                      />
+                    </form>
                   </div>
-
-                  {entry.baseCommand === 'help' && (
-                    <div className="command-output">
-                      <p className="command-title">Available commands</p>
-                      <ul>
-                        {Object.entries(commandDescriptions).map(
-                          ([command, description]) => (
-                            <li key={command}>
-                              <strong>{command}</strong> — {description}
-                            </li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'projects' && (
-                    <div className="command-output">
-                      <p className="command-title">Selected Projects</p>
-                      <div className="project-grid">
-                        {projects.map((project) => (
-                          <article
-                            key={project.title}
-                            className="project-card"
-                          >
-                            <h3>{project.title}</h3>
-                            <p className="project-details">
-                              {project.description}
-                            </p>
-                            <div className="tag-list">
-                              {project.tags.map((tag) => (
-                                <span key={tag} className="tag">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                            {project.links && project.links.length > 0 && (
-                              <div className="project-links">
-                                {project.links.map((link) => (
-                                  <a
-                                    key={link.label}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {link.label}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'resume' && (
-                    <div className="command-output">
-                      <div className="resume-header">
-                        <p className="command-title">Resume</p>
-                        <a className="download-button" href="/resume.pdf" download>
-                          Download PDF
-                        </a>
-                      </div>
-                      <div className="resume-viewer">
-                        <object
-                          data="/resume.pdf"
-                          type="application/pdf"
-                          aria-label="Resume PDF"
-                        >
-                          <p>
-                            Your browser cannot display the PDF. Use the
-                            download button above.
-                          </p>
-                        </object>
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'hobbies' && (
-                    <div className="command-output">
-                      <p className="command-title">Hobbies</p>
-                      <div className="hobby-grid">
-                        {hobbies.map((hobby) => (
-                          <article
-                            key={hobby.title}
-                            className="hobby-card"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => setActiveHobby(hobby)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter' || event.key === ' ') {
-                                event.preventDefault()
-                                setActiveHobby(hobby)
-                              }
-                            }}
-                          >
-                            <div className="hobby-image hobby-image-card">
-                              {hobby.image ? (
-                                <>
-                                  <img
-                                    src={hobby.image}
-                                    alt={hobby.title}
-                                    className="hobby-image-media"
-                                  />
-                                  <button
-                                    type="button"
-                                    className="view-meme-btn view-meme-btn-card"
-                                    onClick={e => {
-                                      e.stopPropagation()
-                                      setExpandedImage({ src: hobby.image!, alt: hobby.title })
-                                    }}
-                                  >
-                                    View meme
-                                  </button>
-                                </>
-                              ) : (
-                                'Click to view'
-                              )}
-                            </div>
-                            <div>
-                              <h3>{hobby.title}</h3>
-                              <p>{hobby.note}</p>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'work' && (
-                    <div className="command-output">
-                      <p className="command-title">Work experience</p>
-                      {workExperiences.length === 0 ? (
-                        <p>Add your roles in the workExperiences list.</p>
-                      ) : (
-                        <div className="work-list">
-                          {workExperiences.map((role) => (
-                            <article key={`${role.role}-${role.org}`}>
-                              <div className="work-heading">
-                                <h3>{role.role}</h3>
-                                <span>{role.org}</span>
-                              </div>
-                              <p className="work-period">{role.period}</p>
-                              <ul>
-                                {role.highlights.map((highlight) => (
-                                  <li key={highlight}>{highlight}</li>
-                                ))}
-                              </ul>
-                            </article>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'awards' && (
-                    <div className="command-output">
-                      <p className="command-title">Awards</p>
-                      <div className="awards-list">
-                        {awards.map((award) => (
-                          <article key={`${award.title}-${award.year}`}>
-                            <div className="awards-heading">
-                              <h3>{award.title}</h3>
-                              <span>{award.year}</span>
-                            </div>
-                            <p className="awards-org">{award.org}</p>
-                            {award.details && (
-                              <p className="awards-details">{award.details}</p>
-                            )}
-                            {award.links && award.links.length > 0 && (
-                              <div className="awards-links">
-                                {award.links.map((link) => (
-                                  <a
-                                    key={link.label}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {link.label}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'classes' && (
-                    <div className="command-output">
-                      <p className="command-title">Classes</p>
-                      <div className="classes-section">
-                        <h3>Computer Science</h3>
-                        <div className="classes-list">
-                          {classes.cs.map((course) => (
-                            <article key={`${course.code}-${course.term}`}>
-                              <div className="classes-heading">
-                                <h3>{course.code}</h3>
-                                <span>{course.term}</span>
-                              </div>
-                              <p className="classes-name">{course.name}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="classes-section">
-                        <h3>Mathematics</h3>
-                        <div className="classes-list">
-                          {classes.math.map((course) => (
-                            <article key={`${course.code}-${course.term}`}>
-                              <div className="classes-heading">
-                                <h3>{course.code}</h3>
-                                <span>{course.term}</span>
-                              </div>
-                              <p className="classes-name">{course.name}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {!entry.isKnown && (
-                    <div className="command-output">
-                      <p className="command-title">Command not found</p>
-                      <p>
-                        Type <strong>help</strong> to see the available commands.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          <form className="terminal-input" onSubmit={handleSubmit}>
-            <span className="prompt">akambire.dev</span>
-            <span className="prompt-symbol">$</span>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(event) => setInputValue(event.target.value)}
-              placeholder="Type a command (help, projects, work, awards, classes, resume, hobbies, theme, clear)"
-              aria-label="Terminal command input"
+                </main>
+              }
             />
-          </form>
+            <Route path="/blog" element={<Finder />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+          </Routes>
         </div>
-      </main>
+        <Dock />
+      </div>
+
       {activeHobby && (
         <div className="hobby-modal" role="dialog" aria-modal="true">
           <div className="hobby-modal-backdrop" onClick={() => setActiveHobby(null)} />
