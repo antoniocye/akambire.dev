@@ -10,7 +10,44 @@ import { loadBlogPosts, formatDate } from './blogUtils'
 
 const allPosts = loadBlogPosts()
 
-const remarkPlugins = [remarkGfm, remarkMath]
+// remark-math v6 treats $$...$$ on a single line as `inlineMath` inside a
+// paragraph instead of a block `math` node. Obsidian (and LaTeX convention)
+// treats it as display math. This plugin runs after remark-math and promotes
+// any paragraph that contains only a single inlineMath child into a proper
+// block math node with the hast data remark-math v6 emits, so rehype-katex
+// picks it up and renders it centered in display mode.
+function remarkPromoteDisplayMath() {
+  return (tree: { children: Array<Record<string, unknown>> }) => {
+    const promote = (nodes: Array<Record<string, unknown>>) => {
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i]
+        const children = n.children as Array<Record<string, unknown>> | undefined
+        if (n.type === 'paragraph' && children?.length === 1 && children[0].type === 'inlineMath') {
+          const val = children[0].value as string
+          nodes[i] = {
+            type: 'math',
+            meta: null,
+            value: val,
+            data: {
+              hName: 'pre',
+              hChildren: [{
+                type: 'element',
+                tagName: 'code',
+                properties: { className: ['language-math', 'math-display'] },
+                children: [{ type: 'text', value: val }],
+              }],
+            },
+          }
+        } else if (Array.isArray(children)) {
+          promote(children)
+        }
+      }
+    }
+    promote(tree.children)
+  }
+}
+
+const remarkPlugins = [remarkGfm, remarkMath, remarkPromoteDisplayMath]
 const rehypePlugins = [rehypeKatex]
 
 function ExpandIcon() {
@@ -67,7 +104,20 @@ export default function BlogPost() {
 
   const postMeta = (
     <header className="blog-post-meta">
-      <h1 className="blog-post-title">{post.title}</h1>
+      <div className="blog-post-meta-title-row">
+        <h1 className="blog-post-title">{post.title}</h1>
+        {!fullscreen && (
+          <button
+            className="blog-fsbtn"
+            onClick={() => setFullscreen(true)}
+            type="button"
+            title="Fullscreen view"
+            aria-label="Open in fullscreen"
+          >
+            <ExpandIcon />
+          </button>
+        )}
+      </div>
       <div className="blog-post-meta-row">
         {post.date && (
           <time className="blog-post-date" dateTime={post.date}>
@@ -105,22 +155,6 @@ export default function BlogPost() {
         </header>
 
         <div className="blog-post-body">
-          {/* Zero-height sticky anchor: keeps the expand button at the top-right
-              of the article viewport as you scroll, without affecting layout */}
-          {!fullscreen && (
-            <div className="blog-fsbtn-anchor" aria-hidden="true">
-              <button
-                className="blog-fsbtn"
-                onClick={() => setFullscreen(true)}
-                type="button"
-                title="Fullscreen view"
-                aria-label="Open in fullscreen"
-                aria-hidden="false"
-              >
-                <ExpandIcon />
-              </button>
-            </div>
-          )}
           <article className="blog-post-article">
             {postMeta}
             <PostContent content={post.content} />
@@ -141,7 +175,6 @@ export default function BlogPost() {
               <PostContent content={post.content} />
             </article>
           </div>
-          {/* Exit button: fixed at top-right, above the fullscreen overlay */}
           <button
             className="blog-fsbtn blog-fsbtn-exit"
             onClick={() => setFullscreen(false)}

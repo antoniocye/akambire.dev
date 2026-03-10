@@ -1820,25 +1820,19 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* Sticky zero-height anchor that pins the expand button to the top-right
-   of the blog post content area — sits above the article without affecting layout */
-.blog-fsbtn-anchor {
-  position: sticky;
-  top: 1rem;
-  height: 0;
-  overflow: visible;
-  z-index: 10;
+/* Title row: post title + expand button side by side */
+.blog-post-meta-title-row {
   display: flex;
-  justify-content: flex-end;
-  padding-right: 1.25rem;
-  pointer-events: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 /* Shared visual style for both expand and collapse buttons */
 .blog-fsbtn {
-  pointer-events: all;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
   border-radius: var(--radius-sm);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -1847,17 +1841,16 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .blog-fsbtn:hover {
   background: var(--bg-hover);
   color: var(--accent);
   border-color: var(--accent-soft-border);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-/* Exit button lives in the portal above the fullscreen overlay */
+/* Exit button rendered in the portal above the fullscreen overlay */
 .blog-fsbtn-exit {
   position: fixed;
   top: 1.25rem;
