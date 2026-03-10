@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import './App.css'
 
-type Command =
+type KnownCommand =
   | 'help'
   | 'projects'
   | 'resume'
@@ -10,6 +10,16 @@ type Command =
   | 'awards'
   | 'classes'
   | 'clear'
+  | 'theme'
+
+type ThemeScheme = 'dark' | 'light' | 'purple' | 'red' | 'blue' | 'green'
+
+type ParsedThemeCommand =
+  | { type: 'help' }
+  | { type: 'current' }
+  | { type: 'toggle' }
+  | { type: 'set'; theme: ThemeScheme }
+  | { type: 'invalid'; value: string }
 
 type HistoryEntry = {
   id: string
@@ -196,7 +206,28 @@ const classes = {
   ],
 }
 
-const commandDescriptions: Record<Command, string> = {
+const KNOWN_COMMANDS: KnownCommand[] = [
+  'help',
+  'projects',
+  'resume',
+  'hobbies',
+  'work',
+  'awards',
+  'classes',
+  'clear',
+  'theme',
+]
+
+const THEME_OPTIONS: ThemeScheme[] = [
+  'dark',
+  'light',
+  'purple',
+  'red',
+  'blue',
+  'green',
+]
+
+const commandDescriptions: Record<KnownCommand, string> = {
   help: 'List available commands',
   projects: 'Show project cards',
   work: 'Show work experience',
@@ -205,66 +236,84 @@ const commandDescriptions: Record<Command, string> = {
   resume: 'Open resume viewer',
   hobbies: 'Show hobbies list',
   clear: 'Clear the terminal output',
+  theme: 'Personalize colors: theme [light|dark|purple|red|blue|green|toggle]',
 }
 
 const buildEmail = (user: string, domain: string) => `${user}@${domain}`
 const obfuscateEmail = (user: string, domain: string) =>
   `${user} [at] ${domain.replace('.', ' [dot] ')}`
-const STORAGE_KEY = 'terminalHistory'
+const HISTORY_STORAGE_KEY = 'terminalHistory'
+const THEME_STORAGE_KEY = 'preferredTheme'
+const DEFAULT_HISTORY: HistoryEntry[] = [
+  { id: 'init-0', command: 'projects' },
+  { id: 'init-1', command: 'help' },
+]
+
+const isKnownCommand = (value: string): value is KnownCommand =>
+  KNOWN_COMMANDS.includes(value as KnownCommand)
+
+const isThemeScheme = (value: string): value is ThemeScheme =>
+  THEME_OPTIONS.includes(value as ThemeScheme)
+
+const parseThemeCommand = (command: string): ParsedThemeCommand => {
+  const tokens = command.trim().toLowerCase().split(/\s+/)
+  const args = tokens.slice(1)
+  if (args.length === 0) {
+    return { type: 'toggle' }
+  }
+  if (args[0] === 'help' || args[0] === 'list') {
+    return { type: 'help' }
+  }
+  if (args[0] === 'current' || args.join(' ') === 'current theme') {
+    return { type: 'current' }
+  }
+  if (args[0] === 'toggle') {
+    return { type: 'toggle' }
+  }
+  if (isThemeScheme(args[0])) {
+    return { type: 'set', theme: args[0] }
+  }
+  return { type: 'invalid', value: args.join(' ') }
+}
 
 function App() {
   const [inputValue, setInputValue] = useState('')
   const [activeHobby, setActiveHobby] = useState<(typeof hobbies)[number] | null>(null)
   const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null)
+  const [theme, setTheme] = useState<ThemeScheme>(() => {
+    if (typeof window === 'undefined') {
+      return 'dark'
+    }
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)?.toLowerCase()
+    return storedTheme && isThemeScheme(storedTheme) ? storedTheme : 'dark'
+  })
   const [history, setHistory] = useState<HistoryEntry[]>(() => {
     if (typeof window === 'undefined') {
-      return [
-        { id: 'init-0', command: 'projects' },
-        { id: 'init-1', command: 'help' },
-      ]
+      return DEFAULT_HISTORY
     }
-    const stored = window.localStorage.getItem(STORAGE_KEY)
+    const stored = window.localStorage.getItem(HISTORY_STORAGE_KEY)
     if (!stored) {
-      return [
-        { id: 'init-0', command: 'projects' },
-        { id: 'init-1', command: 'help' },
-      ]
+      return DEFAULT_HISTORY
     }
     try {
       const parsed = JSON.parse(stored) as HistoryEntry[]
-      return Array.isArray(parsed) && parsed.length > 0
-        ? parsed
-        : [
-            { id: 'init-0', command: 'projects' },
-            { id: 'init-1', command: 'help' },
-          ]
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_HISTORY
     } catch {
-      return [
-        { id: 'init-0', command: 'projects' },
-        { id: 'init-1', command: 'help' },
-      ]
+      return DEFAULT_HISTORY
     }
   })
   const terminalBodyRef = useRef<HTMLDivElement | null>(null)
 
   const commandEntries = useMemo(() => {
     return history.map((entry) => {
-      const normalized = entry.command.trim().toLowerCase() as Command
-      const isKnown = (
-        [
-          'help',
-          'projects',
-          'resume',
-          'hobbies',
-          'work',
-          'awards',
-          'classes',
-          'clear',
-        ] as Command[]
-      ).includes(normalized)
+      const normalized = entry.command.trim().toLowerCase()
+      const [baseCommand = ''] = normalized.split(/\s+/)
+      const isThemeCommand = baseCommand === 'theme'
+      const isKnown = isThemeCommand ? true : isKnownCommand(normalized)
       return {
         ...entry,
         normalized,
+        baseCommand,
         isKnown,
       }
     })
@@ -290,25 +339,51 @@ function App() {
     if (typeof window === 'undefined') {
       return
     }
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
+    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
   }, [history])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return
+    }
+    const root = document.documentElement
+    root.setAttribute('data-theme', theme)
+    root.style.colorScheme = theme === 'light' ? 'light' : 'dark'
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+    }
+  }, [theme])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const trimmed = inputValue.trim().toLowerCase()
-    if (!trimmed) {
+    const trimmedInput = inputValue.trim().toLowerCase()
+    if (!trimmedInput) {
       return
     }
 
-    if (trimmed === 'clear') {
+    if (trimmedInput === 'clear') {
       setHistory([])
       setInputValue('')
       return
     }
 
+    if (trimmedInput === 'theme' || trimmedInput.startsWith('theme ')) {
+      const parsedThemeCommand = parseThemeCommand(trimmedInput)
+      if (parsedThemeCommand.type === 'set') {
+        setTheme(parsedThemeCommand.theme)
+      }
+      if (parsedThemeCommand.type === 'toggle') {
+        setTheme((prevTheme) => {
+          const currentIndex = THEME_OPTIONS.indexOf(prevTheme)
+          const nextIndex = (currentIndex + 1) % THEME_OPTIONS.length
+          return THEME_OPTIONS[nextIndex]
+        })
+      }
+    }
+
     setHistory((prev) => [
       ...prev,
-      { id: `${Date.now()}-${prev.length}`, command: trimmed },
+      { id: `${Date.now()}-${prev.length}`, command: trimmedInput },
     ])
     setInputValue('')
   }
@@ -398,7 +473,7 @@ function App() {
                     <span className="prompt-command">{entry.command}</span>
                   </div>
 
-                  {entry.normalized === 'help' && (
+                  {entry.baseCommand === 'help' && (
                     <div className="command-output">
                       <p className="command-title">Available commands</p>
                       <ul>
@@ -413,7 +488,7 @@ function App() {
                     </div>
                   )}
 
-                  {entry.normalized === 'projects' && (
+                  {entry.baseCommand === 'projects' && (
                     <div className="command-output">
                       <p className="command-title">Selected Projects</p>
                       <div className="project-grid">
@@ -453,7 +528,7 @@ function App() {
                     </div>
                   )}
 
-                  {entry.normalized === 'resume' && (
+                  {entry.baseCommand === 'resume' && (
                     <div className="command-output">
                       <div className="resume-header">
                         <p className="command-title">Resume</p>
@@ -476,7 +551,7 @@ function App() {
                     </div>
                   )}
 
-                  {entry.normalized === 'hobbies' && (
+                  {entry.baseCommand === 'hobbies' && (
                     <div className="command-output">
                       <p className="command-title">Hobbies</p>
                       <div className="hobby-grid">
@@ -527,7 +602,7 @@ function App() {
                     </div>
                   )}
 
-                  {entry.normalized === 'work' && (
+                  {entry.baseCommand === 'work' && (
                     <div className="command-output">
                       <p className="command-title">Work experience</p>
                       {workExperiences.length === 0 ? (
@@ -553,7 +628,7 @@ function App() {
                     </div>
                   )}
 
-                  {entry.normalized === 'awards' && (
+                  {entry.baseCommand === 'awards' && (
                     <div className="command-output">
                       <p className="command-title">Awards</p>
                       <div className="awards-list">
@@ -587,7 +662,7 @@ function App() {
                     </div>
                   )}
 
-                  {entry.normalized === 'classes' && (
+                  {entry.baseCommand === 'classes' && (
                     <div className="command-output">
                       <p className="command-title">Classes</p>
                       <div className="classes-section">
@@ -641,7 +716,7 @@ function App() {
               type="text"
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
-              placeholder="Type a command (help, projects, work, awards, classes, resume, hobbies, clear)"
+              placeholder="Type a command (help, projects, work, awards, classes, resume, hobbies, theme, clear)"
               aria-label="Terminal command input"
             />
           </form>
