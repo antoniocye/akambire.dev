@@ -213,6 +213,7 @@ const classes = {
 
 const KNOWN_COMMANDS: KnownCommand[] = [
   'help',
+  'ls',
   'projects',
   'resume',
   'hobbies',
@@ -221,7 +222,6 @@ const KNOWN_COMMANDS: KnownCommand[] = [
   'classes',
   'clear',
   'theme',
-  'ls',
 ]
 
 const THEME_OPTIONS: ThemeScheme[] = [
@@ -235,13 +235,13 @@ const THEME_OPTIONS: ThemeScheme[] = [
 
 const commandDescriptions: Record<KnownCommand, string> = {
   help: 'List available commands',
+  ls: 'List blog posts — click any filename to open it',
   projects: 'Show project cards',
   work: 'Show work experience',
   awards: 'Show awards',
   classes: 'Show coursework',
   resume: 'Open resume viewer',
   hobbies: 'Show hobbies list',
-  ls: 'List blog posts — click any filename to open it',
   clear: 'Clear the terminal output',
   theme: 'Personalize colors: theme [light|dark|purple|red|blue|green|toggle]',
 }
@@ -286,31 +286,62 @@ const parseThemeCommand = (command: string): ParsedThemeCommand => {
 const blogPosts = loadBlogPosts()
 
 function TerminalIcon({ active }: { active: boolean }) {
+  const bg = active ? 'var(--accent)' : 'var(--bg-surface)'
+  const bgOpacity = active ? '0.18' : '1'
+  const borderColor = active ? 'var(--accent)' : 'var(--border)'
+  const borderOpacity = active ? '0.55' : '1'
+  const symbolStroke = active ? 'var(--accent)' : 'var(--text-faint)'
+  const sw = active ? '2.8' : '2.2'
   return (
-    <svg viewBox="0 0 44 44" className={`dock-app-icon${active ? ' dock-app-icon-active' : ''}`} aria-hidden="true">
-      <rect width="44" height="44" rx="10" fill="var(--bg-elevated)" stroke="var(--border)" strokeWidth="1" />
+    <svg viewBox="0 0 48 48" className="dock-app-icon" aria-hidden="true" shapeRendering="geometricPrecision">
+      <rect x="0.75" y="0.75" width="46.5" height="46.5" rx="10.5"
+        fill={bg} fillOpacity={bgOpacity}
+        stroke={borderColor} strokeOpacity={borderOpacity} strokeWidth="1.5" />
       <polyline
-        points="10,16 19,22 10,28"
-        stroke="var(--accent)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
+        points="11,18 22,24 11,30"
+        stroke={symbolStroke} strokeWidth={sw}
+        strokeLinecap="round" strokeLinejoin="round" fill="none"
       />
-      <line x1="22" y1="28" x2="35" y2="28" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="26" y1="30" x2="38" y2="30"
+        stroke={symbolStroke} strokeWidth={sw} strokeLinecap="round" />
     </svg>
   )
 }
 
 function FinderAppIcon({ active }: { active: boolean }) {
+  const bg = active ? 'var(--accent)' : 'var(--bg-surface)'
+  const bgOpacity = active ? '0.18' : '1'
+  const borderColor = active ? 'var(--accent)' : 'var(--border)'
+  const borderOpacity = active ? '0.55' : '1'
+  const folderFill = 'var(--accent)'
+  const bodyOpacity = active ? '0.5' : '0.28'
+  const tabOpacity = active ? '0.72' : '0.45'
+  const lineOpacity1 = active ? '0.85' : '0.55'
+  const lineOpacity2 = active ? '0.6' : '0.38'
+  const lineOpacity3 = active ? '0.38' : '0.22'
+  const lw = active ? '2' : '1.6'
   return (
-    <svg viewBox="0 0 44 44" className={`dock-app-icon${active ? ' dock-app-icon-active' : ''}`} aria-hidden="true">
-      <rect width="44" height="44" rx="10" fill="var(--bg-elevated)" stroke="var(--border)" strokeWidth="1" />
-      <rect x="8" y="18" width="28" height="18" rx="3" fill="var(--accent)" fillOpacity="0.25" stroke="var(--accent)" strokeWidth="1" strokeOpacity="0.5" />
-      <path d="M8 18 L8 16 Q8 14 10 14 L20 14 L22 18Z" fill="var(--accent)" fillOpacity="0.45" />
-      <line x1="13" y1="24" x2="32" y2="24" stroke="var(--accent)" strokeWidth="1.5" strokeOpacity="0.65" strokeLinecap="round" />
-      <line x1="13" y1="28" x2="27" y2="28" stroke="var(--accent)" strokeWidth="1.5" strokeOpacity="0.45" strokeLinecap="round" />
-      <line x1="13" y1="32" x2="22" y2="32" stroke="var(--accent)" strokeWidth="1.5" strokeOpacity="0.3" strokeLinecap="round" />
+    <svg viewBox="0 0 48 48" className="dock-app-icon" aria-hidden="true" shapeRendering="geometricPrecision">
+      <rect x="0.75" y="0.75" width="46.5" height="46.5" rx="10.5"
+        fill={bg} fillOpacity={bgOpacity}
+        stroke={borderColor} strokeOpacity={borderOpacity} strokeWidth="1.5" />
+      {/* folder body */}
+      <path
+        d="M9 22 H39 V37 Q39 40 36 40 H12 Q9 40 9 37 Z"
+        fill={folderFill} fillOpacity={bodyOpacity}
+      />
+      {/* folder tab */}
+      <path
+        d="M9 22 V19 Q9 17 11 17 H22 L25.5 22 Z"
+        fill={folderFill} fillOpacity={tabOpacity}
+      />
+      {/* lines */}
+      <line x1="15" y1="28" x2="34" y2="28"
+        stroke={folderFill} strokeWidth={lw} strokeOpacity={lineOpacity1} strokeLinecap="round" />
+      <line x1="15" y1="32.5" x2="28" y2="32.5"
+        stroke={folderFill} strokeWidth={lw} strokeOpacity={lineOpacity2} strokeLinecap="round" />
+      <line x1="15" y1="37" x2="22" y2="37"
+        stroke={folderFill} strokeWidth={lw} strokeOpacity={lineOpacity3} strokeLinecap="round" />
     </svg>
   )
 }
