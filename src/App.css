@@ -248,6 +248,10 @@
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gb-dark3) var(--bg-sidebar);
 }
 
 .sidebar-section {
