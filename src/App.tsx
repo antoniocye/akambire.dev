@@ -28,7 +28,7 @@ type HistoryEntry = {
 
 const projects = [
   {
-    title: 'evolve(Browser)',
+    title: 'evolve(browser)',
     description: `Built a Chrome extension and simple fork of Chromium empowering anybody to create cool extensions in order to modify any website to fit their workflow. 
     All of this is done in one prompt using an agentic system with context fed directly from the browser.
     First place winner of the Y Combinator challenge at TreeHacks 2026.`,
@@ -73,7 +73,9 @@ const hobbies = [
     image: '/music.png',
     items: [
       { title: 'Good Kid, m.A.A.d City', detail: 'Kendrick Lamar (2012)' },
+      { title: 'Ready to Die', detail: 'The Notorious B.I.G. (1994)' },
       { title: 'Liquid Swords', detail: "GZA (1995)"},
+      { title: 'The Chronic', detail: "Dr. Dre (1992)"},
       { title: 'DAYTONA', detail: 'Pusha T (2018)' },
       { title: 'Ipséité', detail: 'Damso (2017)' },
       { title: 'Illmatic', detail: 'Nas (1994)' },
@@ -87,7 +89,9 @@ const hobbies = [
     note: 'Recent additions to the shelf. I have over 40 math books lol',
     image: '/books.webp',
     items: [
+      { title: 'Algebra', detail: 'Serge Lang' },
       { title: 'Galois Theory', detail: 'Ian Stewart' },
+      { title: 'Foundations of Mathematical Analysis', detail: 'Johnsonbaugh & Pfaffenberger' },
       { title: 'Numerical Linear Algebra', detail: 'Trefethen & Bau' },
       { title: 'Introduction to Coding Theory', detail: 'van Lint' },
       { title: 'Visual Complex Analysis', detail: 'Needham' },
@@ -176,6 +180,7 @@ const awards: Array<{
 
 const classes = {
   cs: [
+    { code: 'CS 259Q', name: 'Quantum Computing', term: 'Spring 2026'},
     { code: 'CS 355', name: 'Advanced Topics in Cryptography', term: 'Spring 2026'},
     { code: 'CS 240LX', name: 'Advanced Systems Laboratory, Accelerated', term: 'Spring 2026'},
     { code: 'CS 140E', name: 'Operating systems design and implementation', term: 'Winter 2026'},
@@ -189,6 +194,7 @@ const classes = {
     { code: 'CS 161', name: 'Design and Analysis of Algorithms', term: 'Fall 2024' },
     { code: 'CS 107E', name: 'Computer Systems from the Ground Up', term: 'Winter 2024' },
     { code: 'CS 103', name: 'Mathematical Foundations of Computing', term: 'Winter 2024' },
+    { code: 'CS 106B', name: 'Programming Abstractions', term: 'Fall 2023' },
   ],
   math: [
     { code: 'MATH 122', name: 'Modules and Group Representations', term: 'Spring 2026' },
@@ -417,11 +423,11 @@ function App() {
         <section className="sidebar-section">
           <h2>Who am I?</h2>
           <p>
-            A Junior at Stanford interested in cryptography, mathematics, and AI safety.
+            A College student interested in cryptography, mathematics, and AI safety.
           </p>
           <div className="location-lines">
             <span>From Burkina Faso 🇧🇫</span>
-            <span>Currently in California, U.S. 🐻</span>
+            <span>Currently in California, U.S.</span>
           </div>
         </section>
 
@@ -432,7 +438,7 @@ function App() {
             <li>Modern cryptography</li>
             <li>Machine learning</li>
             <li>Zero knowledge proofs</li>
-            <li>C, C++ &amp; Rust</li>
+            <li>C, C++, Rust</li>
           </ul>
         </section>
 
