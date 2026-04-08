@@ -314,12 +314,14 @@ function App() {
     return history.map((entry) => {
       const normalized = entry.command.trim().toLowerCase()
       const [baseCommand = ''] = normalized.split(/\s+/)
-      const isThemeCommand = baseCommand === 'theme'
-      const isKnown = isThemeCommand ? true : isKnownCommand(normalized)
+      const parsedThemeCommand =
+        baseCommand === 'theme' ? parseThemeCommand(normalized) : null
+      const isKnown = parsedThemeCommand ? true : isKnownCommand(normalized)
       return {
         ...entry,
         normalized,
         baseCommand,
+        parsedThemeCommand,
         isKnown,
       }
     })
@@ -699,6 +701,43 @@ function App() {
                           ))}
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {entry.baseCommand === 'theme' && entry.parsedThemeCommand && (
+                    <div className="command-output">
+                      <p className="command-title">Theme</p>
+                      {entry.parsedThemeCommand.type === 'help' && (
+                        <p>
+                          Available themes:{' '}
+                          <strong>{THEME_OPTIONS.join(', ')}</strong>. Use{' '}
+                          <strong>theme toggle</strong> to cycle through them.
+                        </p>
+                      )}
+                      {entry.parsedThemeCommand.type === 'current' && (
+                        <p>
+                          Current theme: <strong>{theme}</strong>.
+                        </p>
+                      )}
+                      {entry.parsedThemeCommand.type === 'toggle' && (
+                        <p>
+                          Theme updated. Current theme: <strong>{theme}</strong>.
+                        </p>
+                      )}
+                      {entry.parsedThemeCommand.type === 'set' && (
+                        <p>
+                          Theme set to{' '}
+                          <strong>{entry.parsedThemeCommand.theme}</strong>.
+                        </p>
+                      )}
+                      {entry.parsedThemeCommand.type === 'invalid' && (
+                        <p>
+                          Unknown theme{' '}
+                          <strong>{entry.parsedThemeCommand.value}</strong>. Try{' '}
+                          <strong>theme help</strong> to see the supported
+                          themes.
+                        </p>
+                      )}
                     </div>
                   )}
 
