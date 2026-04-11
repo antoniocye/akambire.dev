@@ -930,17 +930,16 @@
 
 .awards-list {
   display: grid;
-  gap: 0.6rem;
-  grid-template-columns: 1fr;
-  align-items: start;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: stretch;
 }
 
 .awards-list article {
-  padding: 0.2rem 0 0.8rem 0.85rem;
-  border-radius: 0;
-  background: transparent;
-  border: none;
-  border-left: 1px solid color-mix(in srgb, var(--app-card-border) 85%, transparent);
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-card-border);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -996,8 +995,8 @@
 
 .classes-list {
   display: grid;
-  gap: 0.6rem;
-  grid-template-columns: 1fr;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .classes-section {
@@ -1012,11 +1011,10 @@
 }
 
 .classes-list article {
-  padding: 0.2rem 0 0.8rem 0.85rem;
-  border-radius: 0;
-  background: transparent;
-  border: none;
-  border-left: 1px solid color-mix(in srgb, var(--app-card-border) 85%, transparent);
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-card-border);
   display: grid;
   gap: 0.5rem;
 }
