@@ -68,12 +68,13 @@ npm may be vulnerable.`,
 
 const hobbies = [
   {
-    title: 'Music (Hip hop & R&B)',
-    note: 'Albums I\'ve had on repeat lately.',
+    title: 'Music',
+    note: 'I love to listen to good R&B and hip hop. Always open to try new artists and albums! Click to see some albums I like.',
     image: '/music.png',
     items: [
       { title: 'Good Kid, m.A.A.d City', detail: 'Kendrick Lamar (2012)' },
       { title: 'Ready to Die', detail: 'The Notorious B.I.G. (1994)' },
+      { title: 'Lauryn Hill', detail: 'Miseducation (1998)' },
       { title: 'Liquid Swords', detail: "GZA (1995)"},
       { title: 'The Chronic', detail: "Dr. Dre (1992)"},
       { title: 'DAYTONA', detail: 'Pusha T (2018)' },
@@ -85,8 +86,8 @@ const hobbies = [
     ],
   },
   {
-    title: 'Not reading the math books I collect',
-    note: 'Recent additions to the shelf. I have over 40 math books lol',
+    title: 'Math books',
+    note: 'I may just like collecting math books? Have over 40 of them lol. I have a thing for some of the older, vintage-looking ones. Click to see some of the most recent additions to the shelf!',
     image: '/books.webp',
     items: [
       { title: 'Algebra', detail: 'Serge Lang' },
@@ -99,7 +100,7 @@ const hobbies = [
   },
   {
     title: 'Board games',
-    note: 'The games I like to play most.',
+    note: 'I am a fiend for abstract and strategy-based board games (often with some type of area control) and love forcing my friends to play them with me. Click to see some of the games I own and hit me up for a round!',
     image: '/games.jpg',
     items: [
       { title: 'Spirit Island', detail: 'Gifted Winter 2025 on Christmas (Thanks Haley ❤️!)' },
@@ -123,15 +124,21 @@ const workExperiences: Array<{
     highlights: ["Will work on fun cryptography projects!"]
   },
   {
+    role: "Research Assistant, Prof. Dan Boneh",
+    org: "Stanford Applied Cryptography Group",
+    period: "Jan. 2026 - Present",
+    highlights: ["Worked on a detailed proof showing that the Proximity Gaps Conjecture fails near capacity for certain Reed-Solomon codes over prime fields."]
+  },
+  {
     role: "Section Leader",
-    org: "Computer Science Department",
+    org: "Stanford CS Department",
     period: "Sept. 2024 - Present",
     highlights: ["Course assistant for CS 106A and 106B classes at Stanford",
       "Teaching C++ and Python sections to a dozen students, helping students debug during office hours, and grading assignments and exams."]
   },
   {
     role: "Olympiad Coach",
-    org: "Mathematical Community of Burkina",
+    org: "Communauté Mathématique",
     period: "Aug. 2020 - Present",
     highlights: [
       "Taught classes in number theory from a cryptography perspective to selected students.",
@@ -211,6 +218,27 @@ const classes = {
     { code: 'MATH 51', name: 'Linear Algebra and Multivariable Calculus', term: 'Fall 2023' },
   ],
 }
+
+const education: Array<{
+  school: string
+  degree: string
+  period: string
+  detail?: string
+  focus?: string[]
+}> = [
+  {
+    school: 'Stanford University',
+    degree: 'B.S. in Mathematics',
+    period: '2023-2027',
+    focus: ['Honors with a focus in Algebra'],
+  },
+  {
+    school: 'Stanford University',
+    degree: 'M.S. in Computer Science',
+    period: '2026-2027',
+    focus: ['Computer and Network Security'],
+  },
+]
 
 const KNOWN_COMMANDS: KnownCommand[] = [
   'help',
@@ -414,18 +442,37 @@ function App() {
           </div>
           <h1 className="profile-name">Antonio Kambiré</h1>
           <div className="profile-education">
-            <p>Stanford University</p>
-            <ul>
-              <li>Mathematics B.S. (2023–2027)</li>
-              <li>Prospective CS coterm</li>
-            </ul>
+            <p className="profile-school">Stanford University</p>
+            <div className="profile-degree-list">
+              {education.map((entry) => (
+                <div
+                  key={`${entry.degree}-${entry.period}`}
+                  className="profile-degree-item"
+                >
+                  <div className="profile-degree-row">
+                    <p className="profile-degree-title">{entry.degree}</p>
+                    <span className="profile-degree-period">{entry.period}</span>
+                  </div>
+                  {entry.detail && (
+                    <p className="profile-degree-detail">{entry.detail}</p>
+                  )}
+                  {entry.focus && entry.focus.length > 0 && (
+                    <ul className="profile-education-focus-list">
+                      {entry.focus.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         <section className="sidebar-section">
           <h2>Who am I?</h2>
           <p>
-            A College student interested in cryptography, mathematics, and AI safety.
+            A lifelong learner interested in cryptography, mathematics, and AI safety.
           </p>
           <div className="location-lines">
             <span>From Burkina Faso 🇧🇫</span>
@@ -436,10 +483,9 @@ function App() {
         <section className="sidebar-section">
           <h2>Skills</h2>
           <ul className="skills-list">
-            <li>Mathematics</li>
             <li>Modern cryptography</li>
+            <li>Systems and computer security</li>
             <li>Machine learning</li>
-            <li>Zero knowledge proofs</li>
             <li>C, C++, Rust</li>
           </ul>
         </section>
@@ -593,7 +639,7 @@ function App() {
                                       setExpandedImage({ src: hobby.image!, alt: hobby.title })
                                     }}
                                   >
-                                    View meme
+                                    Expand Meme
                                   </button>
                                 </>
                               ) : (
@@ -621,7 +667,7 @@ function App() {
                             <article key={`${role.role}-${role.org}`}>
                               <div className="work-heading">
                                 <h3>{role.role}</h3>
-                                <span>{role.org}</span>
+                                <span>@ {role.org}</span>
                               </div>
                               <p className="work-period">{role.period}</p>
                               <ul>
@@ -714,14 +760,9 @@ function App() {
                           <strong>theme toggle</strong> to cycle through them.
                         </p>
                       )}
-                      {entry.parsedThemeCommand.type === 'current' && (
-                        <p>
-                          Current theme: <strong>{theme}</strong>.
-                        </p>
-                      )}
                       {entry.parsedThemeCommand.type === 'toggle' && (
                         <p>
-                          Theme updated. Current theme: <strong>{theme}</strong>.
+                          Updated to <strong>{theme}</strong>.
                         </p>
                       )}
                       {entry.parsedThemeCommand.type === 'set' && (
@@ -761,7 +802,7 @@ function App() {
               type="text"
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
-              placeholder="Type a command (help, projects, work, awards, classes, resume, hobbies, theme, clear)"
+              placeholder="Type a command (help, work, projects, awards, classes, resume, hobbies, theme, clear)"
               aria-label="Terminal command input"
             />
           </form>
