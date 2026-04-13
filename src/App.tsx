@@ -1,5 +1,18 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from 'react'
 import './App.css'
+
+const BlogMode = lazy(() =>
+  import('./blog/BlogMode').then((m) => ({ default: m.BlogMode })),
+)
 
 type KnownCommand =
   | 'help'
@@ -11,6 +24,9 @@ type KnownCommand =
   | 'classes'
   | 'clear'
   | 'theme'
+  | 'blog'
+
+type ViewMode = 'terminal' | 'view' | 'blog'
 
 type ThemeScheme = 'dark' | 'light' | 'purple' | 'red' | 'blue' | 'green'
 
@@ -19,6 +35,22 @@ type ParsedThemeCommand =
   | { type: 'current' }
   | { type: 'toggle' }
   | { type: 'set'; theme: ThemeScheme }
+  | { type: 'invalid'; value: string }
+
+type HobbyCommand = 'music' | 'bookshelf' | 'games' | 'media'
+
+type HobbySection = {
+  command: HobbyCommand
+  title: string
+  note: string
+  image?: string
+  emptyMessage?: string
+  items: Array<{ title: string; detail: string }>
+}
+
+type ParsedHobbyCommand =
+  | { type: 'overview' }
+  | { type: 'section'; section: HobbySection }
   | { type: 'invalid'; value: string }
 
 type HistoryEntry = {
@@ -66,8 +98,9 @@ npm may be vulnerable.`,
   },
 ]
 
-const hobbies = [
+const hobbies: HobbySection[] = [
   {
+    command: 'music',
     title: 'Music',
     note: 'I love to listen to good R&B and hip hop. Always open to try new artists and albums! Click to see some albums I like.',
     image: '/music.png',
@@ -86,19 +119,29 @@ const hobbies = [
     ],
   },
   {
-    title: 'Math books',
-    note: 'I may just like collecting math books? Have over 40 of them lol. I have a thing for some of the older, vintage-looking ones. Click to see some of the most recent additions to the shelf!',
+    command: 'bookshelf',
+    title: 'Bookshelf',
+    note: 'A shelf of some of my math books (I own too may of them). I have a thing for some of the older, vintage-looking ones. Open to lending them out if anybody needs them!',
     image: '/books.webp',
     items: [
       { title: 'Algebra', detail: 'Serge Lang' },
+      { title: 'A Book of Abstract Algebra', detail: 'Pinter' },
+      { title: 'Elementary Methods in Number Theorey', detail: 'Nathanson' },
+      { title: 'Elliptic Tales', detail: 'Ash and Gross' },
+      { title: 'Proofs from the BOOK', detail: 'Aigner & Ziegler' },
       { title: 'Galois Theory', detail: 'Ian Stewart' },
+      { title: 'Real Analysis', detail: 'Stein & Shakarchi' },
       { title: 'Foundations of Mathematical Analysis', detail: 'Johnsonbaugh & Pfaffenberger' },
       { title: 'Numerical Linear Algebra', detail: 'Trefethen & Bau' },
       { title: 'Introduction to Coding Theory', detail: 'van Lint' },
       { title: 'Visual Complex Analysis', detail: 'Needham' },
+      { title: 'Functions of a Complex Variable', detail: 'William Fogg Osgood' },
+      { title: 'Fourier Series and Boundary Value Problems', detail: 'Ruel V. Churchill' },
+      { title: 'Real and Complex Analysis', detail: 'Walter Rudin' },
     ],
   },
   {
+    command: 'games',
     title: 'Board games',
     note: 'I am a fiend for abstract and strategy-based board games (often with some type of area control) and love forcing my friends to play them with me. Click to see some of the games I own and hit me up for a round!',
     image: '/games.jpg',
@@ -108,6 +151,13 @@ const hobbies = [
       { title: 'Cryptid', detail: 'Bought Winter 2025' },
       { title: 'Memoir `44', detail: 'Gifted Fall 2025 (Thanks Nico!)' },
     ],
+  },
+  {
+    command: 'media',
+    title: 'Media',
+    note: 'A place to collect great books, films, shows, essays, and whatever else I have watched or read and want to remember.',
+    emptyMessage: 'Add favorite films, books, essays, or shows here.',
+    items: [],
   },
 ]
 
@@ -157,31 +207,33 @@ const workExperiences: Array<{
 
 const awards: Array<{
   title: string
-  org: string
   year: string
   details?: string
-  links?: Array<{ label: string; url: string }>
 }> = [
   {
     title: 'TreeHacks Winner',
-    org: 'TreeHacks @ Stanford',
     year: '2026',
-    details: 'Won the Y Combinator challenge at TreeHacks 2026.',
-    links: [{label: "Devpost", url: "https://devpost.com/software/evolve-browser"}]
+    details: 'Y Combinator challenge winner.',
   },
   {
     title: 'Rise Fellow',
-    org: 'Rise',
     year: '2023',
-    details: 'Recipitient of the Rise Fellowship, with a full-ride scholarship at Stanford, and a network of hundreds of talented people from around the world.',
-    links: [{label: "Rise Website", url: "https://www.risefortheworld.org/global-winners"}]
+    details: 'Full-ride scholarship.',
   },
   {
     title: 'Atlas Fellow',
-    org: 'Atlas',
     year: '2022',
-    details: '2022 Atlas Fellow',
-    links: [{label: "Atlas Website", url: "https://www.atlasfellowship.org/"}]
+    details: '$50k scholarship.',
+  },
+  {
+    title: 'Canada/USA Mathcamp',
+    details: 'Coolest people ever.',
+    year: '2020, 2021',
+  },
+  {
+    title: 'Summer Science Program',
+    details: 'Alumnus of the Astrophysics program @ UNC.',
+    year: '2022',
   },
 ]
 
@@ -219,6 +271,19 @@ const classes = {
   ],
 }
 
+const siteAiModels = [
+  'Composer 2',
+  'GPT-5.4',
+  'Opus 4.6',
+  'Gemma 4 E2B'
+]
+
+const siteAiHarnesses = [
+  'Cursor (editor + cloud)',
+  'Codex',
+  'Claude Code'
+]
+
 const education: Array<{
   school: string
   degree: string
@@ -230,7 +295,7 @@ const education: Array<{
     school: 'Stanford University',
     degree: 'B.S. in Mathematics',
     period: '2023-2027',
-    focus: ['Honors with a focus in Algebra'],
+    focus: ['Honors'],
   },
   {
     school: 'Stanford University',
@@ -250,6 +315,7 @@ const KNOWN_COMMANDS: KnownCommand[] = [
   'classes',
   'clear',
   'theme',
+  'blog',
 ]
 
 const THEME_OPTIONS: ThemeScheme[] = [
@@ -265,12 +331,13 @@ const commandDescriptions: Record<KnownCommand, string> = {
   help: 'List available commands',
   projects: 'Show project cards',
   work: 'Show work experience',
-  awards: 'Show awards',
+  awards: 'Show awards & programs',
   classes: 'Show coursework',
   resume: 'Open resume viewer',
-  hobbies: 'Show hobbies list',
+  hobbies: 'Show hobbies overview or use hobbies [music|bookshelf|games|media]',
   clear: 'Clear the terminal output',
   theme: 'Personalize colors: theme [light|dark|purple|red|blue|green|toggle]',
+  blog: 'Open the blog (optional: blog <post-slug> for a deep link)',
 }
 
 const buildEmail = (user: string, domain: string) => `${user}@${domain}`
@@ -278,6 +345,16 @@ const obfuscateEmail = (user: string, domain: string) =>
   `${user} [at] ${domain.replace('.', ' [dot] ')}`
 const HISTORY_STORAGE_KEY = 'terminalHistory'
 const THEME_STORAGE_KEY = 'preferredTheme'
+const VIEW_MODE_STORAGE_KEY = 'viewMode'
+
+/** Shown at the top of View mode — edit freely. Use `\n` or a multi-line template literal for line breaks. */
+const viewIntro = {
+  headline: 'Yo!',
+  lede: `I am a junior at Stanford interested in modern cryptography (protocol cryptography like zero-knowledge proofs as well as post-quantum cryptography), secure systems, AI Safety, and open source AI.
+
+Take a look at some of my writing in the \`blog\` tab above!`,
+} as const
+
 const DEFAULT_HISTORY: HistoryEntry[] = [
   { id: 'init-0', command: 'projects' },
   { id: 'init-1', command: 'help' },
@@ -288,6 +365,9 @@ const isKnownCommand = (value: string): value is KnownCommand =>
 
 const isThemeScheme = (value: string): value is ThemeScheme =>
   THEME_OPTIONS.includes(value as ThemeScheme)
+
+const getHobbySection = (value: string) =>
+  hobbies.find((section) => section.command === value)
 
 const parseThemeCommand = (command: string): ParsedThemeCommand => {
   const tokens = command.trim().toLowerCase().split(/\s+/)
@@ -310,10 +390,56 @@ const parseThemeCommand = (command: string): ParsedThemeCommand => {
   return { type: 'invalid', value: args.join(' ') }
 }
 
+const parseHobbyCommand = (command: string): ParsedHobbyCommand => {
+  const tokens = command.trim().toLowerCase().split(/\s+/)
+  const args = tokens.slice(1)
+  if (args.length === 0 || args[0] === 'help' || args[0] === 'list') {
+    return { type: 'overview' }
+  }
+
+  const normalizedArg =
+    args[0] === 'books' ? 'bookshelf' : args[0] === 'boardgames' ? 'games' : args[0]
+  const section = getHobbySection(normalizedArg)
+  if (section) {
+    return { type: 'section', section }
+  }
+
+  return { type: 'invalid', value: args.join(' ') }
+}
+
+const sortItemsAlphabetically = (items: HobbySection['items']) =>
+  [...items].sort((left, right) => left.title.localeCompare(right.title))
+
+const COLLAPSED_BOOKSHELF_COUNT = 6
+
+function readInitialViewMode(): ViewMode {
+  if (typeof window === 'undefined') return 'view'
+  const h = window.location.hash
+  if (h === '#blog' || h.startsWith('#blog/')) return 'blog'
+  const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
+  if (stored === 'terminal') return 'terminal'
+  if (stored === 'blog') return 'blog'
+  return 'view'
+}
+
+function readInitialBlogSlug(): string | null {
+  if (typeof window === 'undefined') return null
+  const h = window.location.hash
+  if (!h.startsWith('#blog/')) return null
+  const s = h.slice(6)
+  if (!s) return null
+  try {
+    return decodeURIComponent(s)
+  } catch {
+    return s
+  }
+}
+
 function App() {
   const [inputValue, setInputValue] = useState('')
-  const [activeHobby, setActiveHobby] = useState<(typeof hobbies)[number] | null>(null)
-  const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null)
+  const [expandedBookshelfEntries, setExpandedBookshelfEntries] = useState<string[]>([])
+  const [viewMode, setViewMode] = useState<ViewMode>(readInitialViewMode)
+  const [blogPostSlug, setBlogPostSlug] = useState<string | null>(readInitialBlogSlug)
   const [theme, setTheme] = useState<ThemeScheme>(() => {
     if (typeof window === 'undefined') {
       return 'dark'
@@ -344,12 +470,18 @@ function App() {
       const [baseCommand = ''] = normalized.split(/\s+/)
       const parsedThemeCommand =
         baseCommand === 'theme' ? parseThemeCommand(normalized) : null
-      const isKnown = parsedThemeCommand ? true : isKnownCommand(normalized)
+      const parsedHobbyCommand =
+        baseCommand === 'hobbies' ? parseHobbyCommand(normalized) : null
+      const isKnown =
+        parsedThemeCommand || parsedHobbyCommand
+          ? true
+          : baseCommand === 'blog' || isKnownCommand(normalized)
       return {
         ...entry,
         normalized,
         baseCommand,
         parsedThemeCommand,
+        parsedHobbyCommand,
         isKnown,
       }
     })
@@ -379,6 +511,12 @@ function App() {
   }, [history])
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode)
+    }
+  }, [viewMode])
+
+  useEffect(() => {
     if (typeof document === 'undefined') {
       return
     }
@@ -389,6 +527,42 @@ function App() {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme)
     }
   }, [theme])
+
+  const navigateBlogSlug = useCallback((slug: string | null) => {
+    setBlogPostSlug(slug)
+    if (typeof window === 'undefined') {
+      return
+    }
+    const next =
+      slug !== null && slug !== ''
+        ? `#blog/${encodeURIComponent(slug)}`
+        : '#blog'
+    if (window.location.hash !== next) {
+      window.history.replaceState(null, '', next)
+    }
+  }, [])
+
+  useEffect(() => {
+    const onHash = () => {
+      const h = window.location.hash
+      if (h === '#blog' || h.startsWith('#blog/')) {
+        setViewMode('blog')
+        setBlogPostSlug(
+          h.startsWith('#blog/') && h.length > 6
+            ? decodeURIComponent(h.slice(6))
+            : null,
+        )
+      } else if (h === '#terminal') {
+        setViewMode('terminal')
+        setBlogPostSlug(null)
+      } else if (h === '#view' || h === '') {
+        setViewMode('view')
+        setBlogPostSlug(null)
+      }
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -415,6 +589,21 @@ function App() {
           return THEME_OPTIONS[nextIndex]
         })
       }
+      setInputValue('')
+      return
+    }
+
+    if (trimmedInput === 'blog' || trimmedInput.startsWith('blog ')) {
+      const rest =
+        trimmedInput === 'blog' ? '' : trimmedInput.slice(4).trim()
+      setViewMode('blog')
+      navigateBlogSlug(rest || null)
+      setHistory((prev) => [
+        ...prev,
+        { id: `${Date.now()}-${prev.length}`, command: trimmedInput },
+      ])
+      setInputValue('')
+      return
     }
 
     setHistory((prev) => [
@@ -425,22 +614,33 @@ function App() {
   }
 
   const primaryEmail = buildEmail('akambire', 'stanford.edu')
-  const secondaryEmail = buildEmail('antoniokambire', 'gmail.com')
   const primaryEmailLabel = obfuscateEmail('akambire', 'stanford.edu')
-  const secondaryEmailLabel = obfuscateEmail('antoniokambire', 'gmail.com')
+  const isBookshelfEntryExpanded = (entryId: string) =>
+    expandedBookshelfEntries.includes(entryId)
+  const toggleBookshelfEntry = (entryId: string) => {
+    setExpandedBookshelfEntries((prev) =>
+      prev.includes(entryId)
+        ? prev.filter((id) => id !== entryId)
+        : [...prev, entryId],
+    )
+  }
 
   return (
     <div className="page">
+      <div className="page-body">
+      <div className="sidebar-shell">
       <aside className="sidebar">
         <div className="profile">
-          <div className="profile-image-wrapper">
-            <img
-              src="/profile.jpg"
-              alt="Antonio Kambire"
-              className="profile-image"
-            />
+          <div className="profile-header">
+            <div className="profile-image-wrapper">
+              <img
+                src="/profile.jpg"
+                alt="Antonio Kambire"
+                className="profile-image"
+              />
+            </div>
+            <h1 className="profile-name">Antonio Kambiré</h1>
           </div>
-          <h1 className="profile-name">Antonio Kambiré</h1>
           <div className="profile-education">
             <p className="profile-school">Stanford University</p>
             <div className="profile-degree-list">
@@ -469,44 +669,47 @@ function App() {
           </div>
         </div>
 
-        <section className="sidebar-section">
-          <h2>Who am I?</h2>
-          <p>
-            A lifelong learner interested in cryptography, mathematics, and AI safety.
-          </p>
+        <section className="sidebar-section" aria-labelledby="sidebar-location-heading">
+          <h2 id="sidebar-location-heading" className="sidebar-section-heading">
+            Location
+          </h2>
           <div className="location-lines">
             <span>From Burkina Faso 🇧🇫</span>
             <span>Currently in California, U.S.</span>
           </div>
         </section>
 
-        <section className="sidebar-section">
-          <h2>Skills</h2>
-          <ul className="skills-list">
-            <li>Modern cryptography</li>
-            <li>Systems and computer security</li>
-            <li>Machine learning</li>
-            <li>C, C++, Rust</li>
+        <section className="sidebar-section" aria-labelledby="sidebar-interests-heading">
+          <h2 id="sidebar-interests-heading" className="sidebar-section-heading">
+            Skills
+          </h2>
+          <ul className="sidebar-interests-list">
+            <li>Speak C/C++, Rust, Python & JS</li>
+            <li>I will understand anything</li>
           </ul>
         </section>
 
-        <section className="sidebar-section">
-          <h2>Contact</h2>
+        <section className="sidebar-section" aria-labelledby="sidebar-contact-heading">
+          <h2 id="sidebar-contact-heading" className="sidebar-section-heading">
+            Contact
+          </h2>
           <ul className="contact-list">
             <li>
-              <span>Email (school):</span>
               <a href={`mailto:${primaryEmail}`}>{primaryEmailLabel}</a>
-              <a href={`mailto:${secondaryEmail}`}>{secondaryEmailLabel}</a>
-            </li>
-            <li>
-              <span>Phone:</span>
-              <a href="tel:+16502835358">+1 (650) 283-5358</a>
             </li>
           </ul>
         </section>
       </aside>
+      </div>
 
-      <main className="terminal-panel">
+      <main
+        className={[
+          'terminal-panel',
+          viewMode === 'blog' && 'terminal-panel--blog',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <header className="terminal-header">
           <div className="terminal-dots">
             <span className="dot red" />
@@ -514,362 +717,549 @@ function App() {
             <span className="dot green" />
           </div>
           <div className="terminal-title">akambire.dev</div>
-        </header>
-
-        <div className="terminal-body" ref={terminalBodyRef}>
-          <div className="terminal-output">
-            {commandEntries.map((entry) => {
-              return (
-                <div key={entry.id} className="terminal-entry">
-                  <div className="prompt-line">
-                    <span className="prompt">akambire.dev</span>
-                    <span className="prompt-symbol">$</span>
-                    <span className="prompt-command">{entry.command}</span>
-                  </div>
-
-                  {entry.baseCommand === 'help' && (
-                    <div className="command-output">
-                      <p className="command-title">Available commands</p>
-                      <ul>
-                        {Object.entries(commandDescriptions).map(
-                          ([command, description]) => (
-                            <li key={command}>
-                              <strong>{command}</strong> — {description}
-                            </li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'projects' && (
-                    <div className="command-output">
-                      <p className="command-title">Selected Projects</p>
-                      <div className="project-grid">
-                        {projects.map((project) => (
-                          <article
-                            key={project.title}
-                            className="project-card"
-                          >
-                            <h3>{project.title}</h3>
-                            <p className="project-details">
-                              {project.description}
-                            </p>
-                            <div className="tag-list">
-                              {project.tags.map((tag) => (
-                                <span key={tag} className="tag">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                            {project.links && project.links.length > 0 && (
-                              <div className="project-links">
-                                {project.links.map((link) => (
-                                  <a
-                                    key={link.label}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {link.label}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'resume' && (
-                    <div className="command-output">
-                      <div className="resume-header">
-                        <p className="command-title">Resume</p>
-                        <a className="download-button" href="/resume.pdf" download>
-                          Download PDF
-                        </a>
-                      </div>
-                      <div className="resume-viewer">
-                        <object
-                          data="/resume.pdf"
-                          type="application/pdf"
-                          aria-label="Resume PDF"
-                        >
-                          <p>
-                            Your browser cannot display the PDF. Use the
-                            download button above.
-                          </p>
-                        </object>
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'hobbies' && (
-                    <div className="command-output">
-                      <p className="command-title">Hobbies</p>
-                      <div className="hobby-grid">
-                        {hobbies.map((hobby) => (
-                          <article
-                            key={hobby.title}
-                            className="hobby-card"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => setActiveHobby(hobby)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter' || event.key === ' ') {
-                                event.preventDefault()
-                                setActiveHobby(hobby)
-                              }
-                            }}
-                          >
-                            <div className="hobby-image hobby-image-card">
-                              {hobby.image ? (
-                                <>
-                                  <img
-                                    src={hobby.image}
-                                    alt={hobby.title}
-                                    className="hobby-image-media"
-                                  />
-                                  <button
-                                    type="button"
-                                    className="view-meme-btn view-meme-btn-card"
-                                    onClick={e => {
-                                      e.stopPropagation()
-                                      setExpandedImage({ src: hobby.image!, alt: hobby.title })
-                                    }}
-                                  >
-                                    Expand Meme
-                                  </button>
-                                </>
-                              ) : (
-                                'Click to view'
-                              )}
-                            </div>
-                            <div>
-                              <h3>{hobby.title}</h3>
-                              <p>{hobby.note}</p>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'work' && (
-                    <div className="command-output">
-                      <p className="command-title">Work experience</p>
-                      {workExperiences.length === 0 ? (
-                        <p>Add your roles in the workExperiences list.</p>
-                      ) : (
-                        <div className="work-list">
-                          {workExperiences.map((role) => (
-                            <article key={`${role.role}-${role.org}`}>
-                              <div className="work-heading">
-                                <h3>{role.role}</h3>
-                                <span>@ {role.org}</span>
-                              </div>
-                              <p className="work-period">{role.period}</p>
-                              <ul>
-                                {role.highlights.map((highlight) => (
-                                  <li key={highlight}>{highlight}</li>
-                                ))}
-                              </ul>
-                            </article>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'awards' && (
-                    <div className="command-output">
-                      <p className="command-title">Awards</p>
-                      <div className="awards-list">
-                        {awards.map((award) => (
-                          <article key={`${award.title}-${award.year}`}>
-                            <div className="awards-heading">
-                              <h3>{award.title}</h3>
-                              <span>{award.year}</span>
-                            </div>
-                            <p className="awards-org">{award.org}</p>
-                            {award.details && (
-                              <p className="awards-details">{award.details}</p>
-                            )}
-                            {award.links && award.links.length > 0 && (
-                              <div className="awards-links">
-                                {award.links.map((link) => (
-                                  <a
-                                    key={link.label}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {link.label}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </article>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'classes' && (
-                    <div className="command-output">
-                      <p className="command-title">Classes</p>
-                      <div className="classes-section">
-                        <h3>Computer Science</h3>
-                        <div className="classes-list">
-                          {classes.cs.map((course) => (
-                            <article key={`${course.code}-${course.term}`}>
-                              <div className="classes-heading">
-                                <h3>{course.code}</h3>
-                                <span>{course.term}</span>
-                              </div>
-                              <p className="classes-name">{course.name}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="classes-section">
-                        <h3>Mathematics</h3>
-                        <div className="classes-list">
-                          {classes.math.map((course) => (
-                            <article key={`${course.code}-${course.term}`}>
-                              <div className="classes-heading">
-                                <h3>{course.code}</h3>
-                                <span>{course.term}</span>
-                              </div>
-                              <p className="classes-name">{course.name}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.baseCommand === 'theme' && entry.parsedThemeCommand && (
-                    <div className="command-output">
-                      <p className="command-title">Theme</p>
-                      {entry.parsedThemeCommand.type === 'help' && (
-                        <p>
-                          Available themes:{' '}
-                          <strong>{THEME_OPTIONS.join(', ')}</strong>. Use{' '}
-                          <strong>theme toggle</strong> to cycle through them.
-                        </p>
-                      )}
-                      {entry.parsedThemeCommand.type === 'toggle' && (
-                        <p>
-                          Updated to <strong>{theme}</strong>.
-                        </p>
-                      )}
-                      {entry.parsedThemeCommand.type === 'set' && (
-                        <p>
-                          Theme set to{' '}
-                          <strong>{entry.parsedThemeCommand.theme}</strong>.
-                        </p>
-                      )}
-                      {entry.parsedThemeCommand.type === 'invalid' && (
-                        <p>
-                          Unknown theme{' '}
-                          <strong>{entry.parsedThemeCommand.value}</strong>. Try{' '}
-                          <strong>theme help</strong> to see the supported
-                          themes.
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {!entry.isKnown && (
-                    <div className="command-output">
-                      <p className="command-title">Command not found</p>
-                      <p>
-                        Type <strong>help</strong> to see the available commands.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          <form className="terminal-input" onSubmit={handleSubmit}>
-            <span className="prompt">akambire.dev</span>
-            <span className="prompt-symbol">$</span>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(event) => setInputValue(event.target.value)}
-              placeholder="Type a command (help, work, projects, awards, classes, resume, hobbies, theme, clear)"
-              aria-label="Terminal command input"
-            />
-          </form>
-        </div>
-      </main>
-      {activeHobby && (
-        <div className="hobby-modal" role="dialog" aria-modal="true">
-          <div className="hobby-modal-backdrop" onClick={() => setActiveHobby(null)} />
-          <div className="hobby-modal-content">
-            <div className="hobby-modal-header">
-              <h3>{activeHobby.title}</h3>
-              <button type="button" onClick={() => setActiveHobby(null)}>
-                Close
-              </button>
-            </div>
-            {activeHobby.image && (
-              <div className="hobby-modal-image-wrap">
-                <img
-                  src={activeHobby.image}
-                  alt={activeHobby.title}
-                  className="hobby-modal-image"
-                />
-                <button
-                  type="button"
-                  className="view-meme-btn view-meme-btn-centered"
-                  onClick={() => setExpandedImage({ src: activeHobby.image!, alt: activeHobby.title })}
-                >
-                  View meme
-                </button>
-              </div>
-            )}
-            <p>{activeHobby.note}</p>
-            <ul>
-              {activeHobby.items.map((item) => (
-                <li key={`${item.title}-${item.detail}`}>
-                  <strong>{item.title}</strong>
-                  <span className="hobby-item-detail">{item.detail}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-      {expandedImage && (
-        <div
-          className="expanded-meme-backdrop"
-          onClick={() => setExpandedImage(null)}
-        >
-          <div
-            className="expanded-meme-content"
-            onClick={e => e.stopPropagation()}
-          >
-            <img
-              src={expandedImage.src}
-              alt={expandedImage.alt}
-              className="expanded-meme-image"
-            />
+          <div className="mode-toggle-group" role="group" aria-label="Display mode">
             <button
               type="button"
-              className="expanded-meme-close-button"
-              onClick={() => setExpandedImage(null)}
+              className="mode-toggle-segment"
+              aria-pressed={viewMode === 'terminal'}
+              onClick={() => {
+                setViewMode('terminal')
+                setBlogPostSlug(null)
+                if (typeof window !== 'undefined') {
+                  window.history.replaceState(null, '', '#terminal')
+                }
+              }}
             >
-              Close
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <polyline points="4 17 10 11 4 5" />
+                <line x1="12" y1="19" x2="20" y2="19" />
+              </svg>
+              <span>Terminal</span>
+            </button>
+            <button
+              type="button"
+              className="mode-toggle-segment"
+              aria-pressed={viewMode === 'view'}
+              onClick={() => {
+                setViewMode('view')
+                setBlogPostSlug(null)
+                if (typeof window !== 'undefined') {
+                  window.history.replaceState(null, '', '#view')
+                }
+              }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span>View</span>
+            </button>
+            <button
+              type="button"
+              className="mode-toggle-segment"
+              aria-pressed={viewMode === 'blog'}
+              onClick={() => {
+                setViewMode('blog')
+                navigateBlogSlug(null)
+              }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                <path d="M8 7h8" />
+                <path d="M8 11h8" />
+              </svg>
+              <span>Blog</span>
             </button>
           </div>
-        </div>
-      )}
+        </header>
+
+        {viewMode === 'terminal' ? (
+          <div className="terminal-body" ref={terminalBodyRef}>
+            <div className="terminal-output">
+              {commandEntries.map((entry) => {
+                return (
+                  <div key={entry.id} className="terminal-entry">
+                    <div className="prompt-line">
+                      <span className="prompt">akambire.dev</span>
+                      <span className="prompt-symbol">$</span>
+                      <span className="prompt-command">{entry.command}</span>
+                    </div>
+
+                    {entry.baseCommand === 'help' && (
+                      <div className="command-output">
+                        <p className="command-title">Available commands</p>
+                        <ul>
+                          {Object.entries(commandDescriptions).map(
+                            ([command, description]) => (
+                              <li key={command}>
+                                <strong>{command}</strong> — {description}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                    {entry.baseCommand === 'projects' && (
+                      <div className="command-output">
+                        <p className="command-title">Selected Projects</p>
+                        <div className="project-grid">
+                          {projects.map((project) => (
+                            <article
+                              key={project.title}
+                              className="project-card"
+                            >
+                              <h3>{project.title}</h3>
+                              <p className="project-details">
+                                {project.description}
+                              </p>
+                              <p className="project-meta">{project.tags.join(' / ')}</p>
+                              {project.links && project.links.length > 0 && (
+                                <div className="project-links">
+                                  {project.links.map((link) => (
+                                    <a
+                                      key={link.label}
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      {link.label}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {entry.baseCommand === 'resume' && (
+                      <div className="command-output">
+                        <div className="resume-header">
+                          <p className="command-title">Resume</p>
+                          <a className="download-button" href="/resume.pdf" download>
+                            Download PDF
+                          </a>
+                        </div>
+                        <div className="resume-viewer">
+                          <object
+                            data="/resume.pdf"
+                            type="application/pdf"
+                            aria-label="Resume PDF"
+                          >
+                            <p>
+                              Your browser cannot display the PDF. Use the
+                              download button above.
+                            </p>
+                          </object>
+                        </div>
+                      </div>
+                    )}
+
+                    {entry.baseCommand === 'hobbies' && entry.parsedHobbyCommand && (
+                      <div className="command-output">
+                        {entry.parsedHobbyCommand.type === 'overview' && (
+                          <>
+                            <p className="command-title">Hobbies</p>
+                            <div className="hobby-grid">
+                              {hobbies.map((hobby) => (
+                                <article key={hobby.command} className="hobby-card">
+                                  <div>
+                                    <h3>{hobby.title}</h3>
+                                    <p>{hobby.note}</p>
+                                    <p className="hobby-command-hint">
+                                      <strong>hobbies {hobby.command}</strong>
+                                    </p>
+                                  </div>
+                                </article>
+                              ))}
+                            </div>
+                          </>
+                        )}
+
+                        {entry.parsedHobbyCommand.type === 'section' && (
+                          <>
+                            <p className="command-title">
+                              {entry.parsedHobbyCommand.section.title}
+                            </p>
+                            <p className="hobby-section-note">
+                              {entry.parsedHobbyCommand.section.note}
+                            </p>
+                            {entry.parsedHobbyCommand.section.command === 'bookshelf' ? (
+                              <>
+                                <div className="bookshelf-grid">
+                                  {sortItemsAlphabetically(
+                                    entry.parsedHobbyCommand.section.items,
+                                  )
+                                    .slice(
+                                      0,
+                                      isBookshelfEntryExpanded(entry.id)
+                                        ? entry.parsedHobbyCommand.section.items.length
+                                        : COLLAPSED_BOOKSHELF_COUNT,
+                                    )
+                                    .map((item) => (
+                                  <article
+                                    key={`${item.title}-${item.detail}`}
+                                    className="bookshelf-book"
+                                  >
+                                    <p className="bookshelf-book-title">{item.title}</p>
+                                    <p className="bookshelf-book-detail">{item.detail}</p>
+                                  </article>
+                                    ))}
+                                </div>
+                                {entry.parsedHobbyCommand.section.items.length >
+                                  COLLAPSED_BOOKSHELF_COUNT && (
+                                  <button
+                                    type="button"
+                                    className="bookshelf-toggle"
+                                    onClick={() => toggleBookshelfEntry(entry.id)}
+                                  >
+                                    {isBookshelfEntryExpanded(entry.id)
+                                      ? 'Show fewer books'
+                                      : `Show ${
+                                          entry.parsedHobbyCommand.section.items.length -
+                                          COLLAPSED_BOOKSHELF_COUNT
+                                        } more books`}
+                                  </button>
+                                )}
+                              </>
+                            ) : entry.parsedHobbyCommand.section.items.length > 0 ? (
+                              <div className="hobby-section-list">
+                                {entry.parsedHobbyCommand.section.items.map((item) => (
+                                  <article
+                                    key={`${item.title}-${item.detail}`}
+                                    className="hobby-section-item"
+                                  >
+                                    <p className="hobby-section-item-title">{item.title}</p>
+                                    <p className="hobby-section-item-detail">{item.detail}</p>
+                                  </article>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="terminal-helper">
+                                {entry.parsedHobbyCommand.section.emptyMessage}
+                              </p>
+                            )}
+                          </>
+                        )}
+
+                        {entry.parsedHobbyCommand.type === 'invalid' && (
+                          <>
+                            <p className="command-title">Hobbies</p>
+                            <p>
+                              Unknown hobby section{' '}
+                              <strong>{entry.parsedHobbyCommand.value}</strong>. Try{' '}
+                              <strong>hobbies</strong>, <strong>hobbies music</strong>,{' '}
+                              <strong>hobbies bookshelf</strong>,{' '}
+                              <strong>hobbies games</strong>, or{' '}
+                              <strong>hobbies media</strong>.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {entry.baseCommand === 'work' && (
+                      <div className="command-output">
+                        <p className="command-title">Work experience</p>
+                        {workExperiences.length === 0 ? (
+                          <p>Add your roles in the workExperiences list.</p>
+                        ) : (
+                          <div className="work-list">
+                            {workExperiences.map((role) => (
+                              <article key={`${role.role}-${role.org}`}>
+                                <div className="work-heading">
+                                  <h3>{role.role}</h3>
+                                  <span>@ {role.org}</span>
+                                </div>
+                                <p className="work-period">{role.period}</p>
+                                <ul>
+                                  {role.highlights.map((highlight) => (
+                                    <li key={highlight}>{highlight}</li>
+                                  ))}
+                                </ul>
+                              </article>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {entry.baseCommand === 'awards' && (
+                      <div className="command-output">
+                        <p className="command-title">Awards & Programs</p>
+                        <div className="awards-list">
+                          {awards.map((award) => (
+                            <article key={`${award.title}-${award.year}`}>
+                              <div className="awards-heading">
+                                <h3>{award.title}</h3>
+                                <span className="awards-year">{award.year}</span>
+                              </div>
+                              {award.details && (
+                                <p className="awards-details">{award.details}</p>
+                              )}
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {entry.baseCommand === 'classes' && (
+                      <div className="command-output">
+                        <p className="command-title">Classes</p>
+                        <div className="classes-section">
+                          <h3>Computer Science</h3>
+                          <div className="classes-list">
+                            {classes.cs.map((course) => (
+                              <article key={`${course.code}-${course.term}`}>
+                                <div className="classes-heading">
+                                  <h3>{course.code}</h3>
+                                  <span>{course.term}</span>
+                                </div>
+                                <p className="classes-name">{course.name}</p>
+                              </article>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="classes-section">
+                          <h3>Mathematics</h3>
+                          <div className="classes-list">
+                            {classes.math.map((course) => (
+                              <article key={`${course.code}-${course.term}`}>
+                                <div className="classes-heading">
+                                  <h3>{course.code}</h3>
+                                  <span>{course.term}</span>
+                                </div>
+                                <p className="classes-name">{course.name}</p>
+                              </article>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {entry.baseCommand === 'blog' && (
+                      <div className="command-output">
+                        <p className="command-title">Blog</p>
+                        <p>
+                          {entry.normalized === 'blog' ? (
+                            <>
+                              Opened the <strong>blog</strong>. Use{' '}
+                              <strong>Blog</strong> in the header to read posts in reader
+                              mode.
+                            </>
+                          ) : (
+                            <>
+                              Deep link to{' '}
+                              <strong>{entry.normalized.slice(4).trim()}</strong>. Switch
+                              to <strong>Blog</strong> mode — markdown opens in the reader;
+                              PDFs open in a new tab.
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    )}
+
+                    {!entry.isKnown && (
+                      <div className="command-output">
+                        <p className="command-title">Command not found</p>
+                        <p>
+                          Type <strong>help</strong> to see the available commands.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            <form className="terminal-input" onSubmit={handleSubmit}>
+              <span className="prompt">akambire.dev</span>
+              <span className="prompt-symbol">$</span>
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(event) => setInputValue(event.target.value)}
+                placeholder="Type a command (help, work, projects, blog, awards, classes, resume, hobbies, theme, clear)"
+                aria-label="Terminal command input"
+              />
+            </form>
+          </div>
+        ) : viewMode === 'view' ? (
+          <div className="view-mode">
+            <section
+              className="view-intro"
+              aria-labelledby="view-intro-heading"
+            >
+              <h2 id="view-intro-heading" className="view-intro-headline">
+                {viewIntro.headline}
+              </h2>
+              <p className="view-intro-lede">{viewIntro.lede}</p>
+            </section>
+
+            <section className="view-section">
+              <h2 className="view-section-title">Experience</h2>
+              <div className="view-flat-list">
+                {workExperiences.map((role) => (
+                  <article key={`${role.role}-${role.org}`} className="view-flat-item">
+                    <div className="view-flat-header">
+                      <h3>{role.role}</h3>
+                      <span className="view-flat-meta">{role.period}</span>
+                    </div>
+                    <p className="view-flat-org">{role.org}</p>
+                    <ul className="view-flat-bullets">
+                      {role.highlights.map((h) => (
+                        <li key={h}>{h}</li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="view-section">
+              <h2 className="view-section-title">Projects</h2>
+              <div className="view-flat-list">
+                {projects.map((project) => (
+                  <article key={project.title} className="view-flat-item">
+                    <h3>{project.title}</h3>
+                    <p className="view-flat-desc">{project.description}</p>
+                    <p className="project-meta">{project.tags.join(' / ')}</p>
+                    {project.links && project.links.length > 0 && (
+                      <div className="project-links">
+                        {project.links.map((link) => (
+                          <a key={link.label} href={link.url} target="_blank" rel="noreferrer">
+                            {link.label}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="view-section">
+              <h2 className="view-section-title">Awards & Programs</h2>
+              <div className="view-flat-list view-flat-list--awards">
+                {awards.map((award) => (
+                  <article key={`${award.title}-${award.year}`} className="view-flat-item">
+                    <div className="view-flat-header">
+                      <h3>{award.title}</h3>
+                      <span className="view-flat-meta">{award.year}</span>
+                    </div>
+                    {award.details && <p className="view-flat-desc">{award.details}</p>}
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="view-section view-section--coursework">
+              <h2 className="view-section-title">Coursework</h2>
+              <div className="view-course-columns">
+                <div className="view-subsection">
+                  <h3 className="view-subsection-title">Computer Science</h3>
+                  <div className="view-course-grid">
+                    {classes.cs.map((course) => (
+                      <div key={`${course.code}-${course.term}`} className="view-course">
+                        <span className="view-course-code">{course.code}</span>
+                        <span className="view-course-name">{course.name}</span>
+                        <span className="view-course-term">{course.term}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="view-subsection">
+                  <h3 className="view-subsection-title">Mathematics</h3>
+                  <div className="view-course-grid">
+                    {classes.math.map((course) => (
+                      <div key={`${course.code}-${course.term}`} className="view-course">
+                        <span className="view-course-code">{course.code}</span>
+                        <span className="view-course-name">{course.name}</span>
+                        <span className="view-course-term">{course.term}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        ) : (
+          <Suspense
+            fallback={
+              <div className="blog-mode blog-loading" role="status">
+                Loading blog…
+              </div>
+            }
+          >
+            <BlogMode
+              selectedSlug={blogPostSlug}
+              onSelectSlug={navigateBlogSlug}
+            />
+          </Suspense>
+        )}
+
+        {(viewMode === 'view' ||
+          (viewMode === 'blog' && blogPostSlug === null)) && (
+          <footer className="site-footer">
+            <p className="site-footer-lead">
+              I built most of this website using llms (the blog posts and content are mine though!) I want to keep up with the capabilities of
+              new AI models so will be using this website as a playground for that. Ask me about the various insights I've gathered through this mini-experiment if you wish!
+            </p>
+            <div className="site-footer-columns">
+              <div className="site-footer-block">
+                <h3 className="site-footer-heading">Models</h3>
+                <ul className="site-footer-list">
+                  {siteAiModels.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="site-footer-block">
+                <h3 className="site-footer-heading">Tools &amp; harnesses</h3>
+                <ul className="site-footer-list">
+                  {siteAiHarnesses.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </footer>
+        )}
+      </main>
+      </div>
     </div>
   )
 }

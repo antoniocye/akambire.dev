@@ -1,0 +1,11 @@
+{
+  "posts": [
+    {
+      "slug": "mathcamp-zk",
+      "title": "Mathcamp ZK Notes",
+      "date": "2025-08-01",
+      "file": "mathcamp_zk.pdf",
+      "description": "The notes for the class I taught at Mathcamp during summer 2025."
+    }
+  ]
+}
