@@ -164,24 +164,33 @@ const hobbies: HobbySection[] = [
 const workExperiences: Array<{
   role: string
   org: string
+  orgUrl?: string
   period: string
   highlights: string[]
+  links?: Array<{ label: string; url: string }>
 }> = [
   {
     role: "Cryptography Research Intern",
     org: "zkSecurity",
+    orgUrl: "https://www.zksecurity.xyz",
     period: "Incoming - Summer 2026",
     highlights: ["Will work on fun cryptography projects!"]
   },
   {
-    role: "Research Assistant, Prof. Dan Boneh",
+    role: "Research Contributor, Prof. Dan Boneh \@ Stanford",
     org: "Stanford Applied Cryptography Group",
+    orgUrl: "https://crypto.stanford.edu/",
+    links: [
+      {label: "Paper", url: "https://arxiv.org/abs/2604.09724"},
+      {label: "Work Ackowledged", url: "https://eprint.iacr.org/2026/680"}
+    ],
     period: "Jan. 2026 - Present",
     highlights: ["Worked on a detailed proof showing that the Proximity Gaps Conjecture fails near capacity for certain Reed-Solomon codes over prime fields."]
   },
   {
     role: "Section Leader",
     org: "Stanford CS Department",
+    orgUrl: "https://cs.stanford.edu/",
     period: "Sept. 2024 - Present",
     highlights: ["Course assistant for CS 106A and 106B classes at Stanford",
       "Teaching C++ and Python sections to a dozen students, helping students debug during office hours, and grading assignments and exams."]
@@ -189,6 +198,7 @@ const workExperiences: Array<{
   {
     role: "Olympiad Coach",
     org: "Communauté Mathématique",
+    orgUrl: "https://cmathburkina.org/",
     period: "Aug. 2020 - Present",
     highlights: [
       "Taught classes in number theory from a cryptography perspective to selected students.",
@@ -199,6 +209,7 @@ const workExperiences: Array<{
   {
     role: "Junior Counselor",
     org: "Canada/USA Mathcamp",
+    orgUrl: "https://www.mathcamp.org/",
     period: "June 2025 - Aug. 2025",
     highlights: ["Taught a class on the Groth16 zero-knowledge proof system to mathematically gifted high school students.",
       "Served as a residential advisor, helped run day-to-day camp operations, and led activities and field trips."]
@@ -352,7 +363,7 @@ const viewIntro = {
   headline: 'Yo!',
   lede: `I am a junior at Stanford interested in modern cryptography (protocol cryptography like zero-knowledge proofs as well as post-quantum cryptography), secure systems, AI Safety, and open source AI.
 
-Take a look at some of my writing in the \`blog\` tab above!`,
+Take a look at some of my writing in the \`Blog\` tab above!`,
 } as const
 
 const DEFAULT_HISTORY: HistoryEntry[] = [
@@ -684,8 +695,8 @@ function App() {
             Skills
           </h2>
           <ul className="sidebar-interests-list">
-            <li>Speak C/C++, Rust, Python & JS</li>
-            <li>I will understand anything</li>
+            <li>I speak C/C++, Rust, Python & JS</li>
+            <li>I can teach myself hard things</li>
           </ul>
         </section>
 
@@ -1002,9 +1013,37 @@ function App() {
                               <article key={`${role.role}-${role.org}`}>
                                 <div className="work-heading">
                                   <h3>{role.role}</h3>
-                                  <span>@ {role.org}</span>
+                                  <span className="work-org-line">
+                                    @{' '}
+                                    {role.orgUrl ? (
+                                      <a
+                                        href={role.orgUrl}
+                                        className="work-org-link"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        {role.org}
+                                      </a>
+                                    ) : (
+                                      role.org
+                                    )}
+                                  </span>
                                 </div>
                                 <p className="work-period">{role.period}</p>
+                                {role.links && role.links.length > 0 && (
+                                  <div className="work-extra-links">
+                                    {role.links.map((link) => (
+                                      <a
+                                        key={`${link.label}-${link.url}`}
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        {link.label}
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
                                 <ul>
                                   {role.highlights.map((highlight) => (
                                     <li key={highlight}>{highlight}</li>
@@ -1138,7 +1177,29 @@ function App() {
                       <h3>{role.role}</h3>
                       <span className="view-flat-meta">{role.period}</span>
                     </div>
-                    <p className="view-flat-org">{role.org}</p>
+                    <p className="view-flat-org">
+                      {role.orgUrl ? (
+                        <a
+                          href={role.orgUrl}
+                          className="view-flat-org-link"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {role.org}
+                        </a>
+                      ) : (
+                        role.org
+                      )}
+                    </p>
+                    {role.links && role.links.length > 0 && (
+                      <div className="project-links work-experience-view-links">
+                        {role.links.map((link) => (
+                          <a key={`${link.label}-${link.url}`} href={link.url} target="_blank" rel="noreferrer">
+                            {link.label}
+                          </a>
+                        ))}
+                      </div>
+                    )}
                     <ul className="view-flat-bullets">
                       {role.highlights.map((h) => (
                         <li key={h}>{h}</li>
@@ -1235,12 +1296,12 @@ function App() {
           (viewMode === 'blog' && blogPostSlug === null)) && (
           <footer className="site-footer">
             <p className="site-footer-lead">
-              I built most of this website using llms (the blog posts and content are mine though!) I want to keep up with the capabilities of
-              new AI models so will be using this website as a playground for that. Ask me about the various insights I've gathered through this mini-experiment if you wish!
+              I built most of this website using various (the blog posts and other content are mine though!) I really want to somewhat keep up with the capabilities of
+              new AI models so I will be using this website as a playground for that. Ask me about the various insights I've gathered through this mini-experiment if you wish!
             </p>
             <div className="site-footer-columns">
               <div className="site-footer-block">
-                <h3 className="site-footer-heading">Models</h3>
+                <h3 className="site-footer-heading">Models Used</h3>
                 <ul className="site-footer-list">
                   {siteAiModels.map((item) => (
                     <li key={item}>{item}</li>

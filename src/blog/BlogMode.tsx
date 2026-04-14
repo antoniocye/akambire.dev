@@ -254,7 +254,7 @@ export function BlogMode({ selectedSlug, onSelectSlug }: BlogModeProps) {
         <div className="blog-index-intro">
           <h2 className="blog-index-title">Notes and Writing</h2>
           <p className="blog-index-lede">
-            I will post some of the cooler things (and I end up doing a writeup for) here!
+            I will post some of the cooler things I do and learn (and I end up doing a writeup for) here!
           </p>
         </div>
         <label className="blog-search">
