@@ -4,8 +4,6 @@ date: 2026-05-23
 summary: Notes on ARC's Competing with Sampling agenda, rare-event auditing, and a small empirical experiment.
 ---
 
-# Competing with Sampling
-
 I have been recently trying to learn more about interpretability. While looking at the [MATS tracks for Autumn 2026](https://www.matsprogram.org/program/autumn-2026), I came across the Alignment Research Center's post "Competing with Sampling," which lays out their recent research orientation around outperforming random sampling when estimating properties of neural network outputs.
 
 The core idea is elegant. Imagine you are auditing a neural network and want to estimate how often it produces catastrophic outputs, as judged by some catastrophe detector. A straightforward way to do this is to sample many inputs, run the model on them, apply the detector, and use the observed frequency as an estimate of the true catastrophe rate. The issue is that if catastrophic outputs are very rare, then this requires an enormous number of samples before you can be confident that your estimate is close to the true rate.
