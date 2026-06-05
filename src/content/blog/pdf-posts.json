@@ -6,6 +6,13 @@
       "date": "2025-08-01",
       "file": "mathcamp_zk.pdf",
       "description": "The notes for the class I taught at Mathcamp during summer 2025."
+    },
+    {
+      "slug": "122-notes",
+      "title": "Stanford Math 122 Notes",
+      "date": "2026-06-05",
+      "file": "122_notes.pdf",
+      "description": "The notes for Stanford Math 122 (Modules and Group Representations), from Spring 2026."
     }
   ]
 }
