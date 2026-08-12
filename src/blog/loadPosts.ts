@@ -1,5 +1,6 @@
 import type { BlogPost } from './types'
 import pdfManifest from '../content/blog/pdf-posts.json'
+import interactiveManifest from '../content/blog/interactive-posts.json'
 
 type PdfManifest = {
   posts: Array<{
@@ -7,6 +8,16 @@ type PdfManifest = {
     title: string
     date: string
     file: string
+    description?: string
+  }>
+}
+
+type InteractiveManifest = {
+  posts: Array<{
+    slug: string
+    title: string
+    date: string
+    path: string
     description?: string
   }>
 }
@@ -84,8 +95,20 @@ export function getPdfPosts(): BlogPost[] {
   }))
 }
 
+export function getInteractivePosts(): BlogPost[] {
+  const m = interactiveManifest as InteractiveManifest
+  return m.posts.map((p) => ({
+    kind: 'interactive' as const,
+    slug: p.slug,
+    title: p.title,
+    date: p.date,
+    url: `/blog/${p.path}`,
+    description: p.description,
+  }))
+}
+
 export function getAllPosts(): BlogPost[] {
-  return [...getMarkdownPosts(), ...getPdfPosts()].sort((a, b) =>
+  return [...getMarkdownPosts(), ...getPdfPosts(), ...getInteractivePosts()].sort((a, b) =>
     b.date.localeCompare(a.date),
   )
 }

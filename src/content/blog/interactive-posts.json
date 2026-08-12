@@ -1,0 +1,11 @@
+{
+  "posts": [
+    {
+      "slug": "grand-mca-challenge-counterexamples",
+      "title": "Grand MCA Challenge Counterexamples",
+      "date": "2026-08-12",
+      "path": "grand-mca-challenge-counterexamples/",
+      "description": "An interactive notebook on Reed–Solomon codes, correlated agreement, and locator-polynomial counterexamples."
+    }
+  ]
+}

@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive notebook on Reed–Solomon codes, correlated agreement, and locator-polynomial counterexamples.">
+
+<title>Grand MCA Challenge Counterexamples</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/tabby.min.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-html-640605f58ae58ee79329c070719e555b.min.css" rel="stylesheet" append-hash="true" data-mode="light">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+
+
+
+
+<section id="grand-mca-challenge-counterexamples" class="notebook">
+<h1>Grand MCA Challenge Counterexamples</h1>
+<h2 class="rs-heading" id="reedsolomon-codes">Reed–Solomon Codes</h2>
+<div class="equation-section">
+<p><span class="math display">\[
+f(X)
+=
+\boxed{a_0}
++\boxed{a_1}X
++\boxed{a_2}X^2
++\cdots+
+\boxed{a_{k-1}}X^{k-1}
+\]</span></p>
+<p><span class="math display">\[
+f(X)
+=
+\begin{bmatrix}
+1 &amp; X &amp; X^2 &amp; \cdots &amp; X^{k-1}
+\end{bmatrix}
+\begin{bmatrix}
+a_0\\a_1\\a_2\\\vdots\\a_{k-1}
+\end{bmatrix}
+\]</span></p>
+</div>
+<div class="equation-section">
+<p><span class="math display">\[
+\text{Set the evaluation domain }\mathcal L
+=\{\alpha_0,\alpha_1,\ldots,\alpha_n\}\subseteq\mathbb F,
+\qquad \alpha_i\neq\alpha_j\text{ for }i\neq j.
+\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{ev}_{\mathcal L}:\mathbb F_{&lt;k}[X]&amp;\longrightarrow\mathbb F^{n+1}\\
+f&amp;\longmapsto
+\begin{bmatrix}
+f(\alpha_0)\\f(\alpha_1)\\\vdots\\f(\alpha_n)
+\end{bmatrix}
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+\begin{bmatrix}
+f(\alpha_0)\\
+f(\alpha_1)\\
+\vdots\\
+f(\alpha_n)
+\end{bmatrix}
+=
+\underbrace{\begin{bmatrix}
+1 &amp; \alpha_0 &amp; \alpha_0^2 &amp; \cdots &amp; \alpha_0^{k-1}\\
+1 &amp; \alpha_1 &amp; \alpha_1^2 &amp; \cdots &amp; \alpha_1^{k-1}\\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+1 &amp; \alpha_n &amp; \alpha_n^2 &amp; \cdots &amp; \alpha_n^{k-1}
+\end{bmatrix}}_{V_{\mathcal L}}
+\begin{bmatrix}
+a_0\\a_1\\a_2\\\vdots\\a_{k-1}
+\end{bmatrix}
+\]</span></p>
+</div>
+<div class="equation-section final-equation">
+<p><span class="math display">\[
+\boxed{
+\operatorname{RS}(\mathbb F,\mathcal L,k)
+=
+\operatorname{im}(\operatorname{ev}_{\mathcal L})
+=
+\left\{V_{\mathcal L}\mathbf a:\mathbf a\in\mathbb F^k\right\}
+}
+\]</span></p>
+</div>
+<div class="proximity-section">
+<div class="map-formula">
+<p><span class="math display">\[
+\mathbb R^2\xrightarrow{\;V_{\mathcal L}\;}\operatorname{im}(V_{\mathcal L})\subset\mathbb R^3,
+\qquad
+(a_0,a_1)\longmapsto(a_0-a_1,\ a_0,\ a_0+a_1),
+\qquad
+\mathcal L=\{-1,0,1\}
+\]</span></p>
+</div>
+<div class="map-option-row">
+  <button id="affine-line-toggle" class="affine-line-toggle" type="button" aria-pressed="false"><span></span>affine line</button>
+</div>
+<div class="map-shell">
+<svg id="linear-map-3d" class="map-svg" viewbox="0 0 1100 500" role="img" aria-label="Interactive map from a vector in R two to its vector on a rotatable code plane in R three">
+  <defs>
+    <marker id="vector-arrow" viewbox="0 0 12 8" refx="10.5" refy="4" markerwidth="5" markerheight="4" orient="auto">
+      <path d="M 0 0 L 12 4 L 0 8 z"></path>
+    </marker>
+    <marker id="axis-arrow" viewbox="0 0 12 8" refx="10.5" refy="4" markerwidth="4" markerheight="3" orient="auto">
+      <path d="M 0 0 L 12 4 L 0 8 z"></path>
+    </marker>
+  </defs>
+
+  <g id="input-space">
+    <rect class="interaction-zone" x="28" y="70" width="340" height="380"></rect>
+    <text class="space-title" x="195" y="48" text-anchor="middle">coefficient space ℝ²</text>
+    <line class="grid-line" x1="110" y1="130" x2="110" y2="420"></line>
+    <line class="grid-line" x1="195" y1="130" x2="195" y2="420"></line>
+    <line class="grid-line" x1="280" y1="130" x2="280" y2="420"></line>
+    <line class="grid-line" x1="50" y1="190" x2="340" y2="190"></line>
+    <line class="grid-line" x1="50" y1="275" x2="340" y2="275"></line>
+    <line class="grid-line" x1="50" y1="360" x2="340" y2="360"></line>
+    <line class="axis-line" x1="48" y1="275" x2="344" y2="275" marker-end="url(#axis-arrow)"></line>
+    <line class="axis-line" x1="195" y1="424" x2="195" y2="126" marker-end="url(#axis-arrow)"></line>
+    <text class="axis-label" x="352" y="281">a₀</text>
+    <text class="axis-label" x="186" y="113">a₁</text>
+    <circle class="origin-point" cx="195" cy="275" r="3.5"></circle>
+    <line id="input-vector" class="vector-line" x1="195" y1="275" x2="195" y2="275" marker-end="url(#vector-arrow)"></line>
+    <circle id="coeff-point" class="drag-point" cx="195" cy="275" r="14" tabindex="0" role="slider" aria-label="Coefficient vector"></circle>
+    <text id="coeff-label" class="point-label" x="210" y="258">a</text>
+  </g>
+
+  <g id="linear-arrow">
+    <line class="map-arrow-line" x1="392" y1="275" x2="535" y2="275" marker-end="url(#vector-arrow)"></line>
+    <text class="map-label" x="463" y="249" text-anchor="middle">V<tspan baseline-shift="sub" font-size="11">ℒ</tspan></text>
+  </g>
+
+  <g id="output-space">
+    <text class="space-title" x="815" y="48" text-anchor="middle">ambient space ℝ³</text>
+    <polygon id="code-plane" class="code-plane" points=""></polygon>
+    <g id="plane-grid"></g>
+    <line id="axis-x-negative" class="axis-line axis-negative"></line>
+    <line id="axis-y-negative" class="axis-line axis-negative"></line>
+    <line id="axis-z-negative" class="axis-line axis-negative"></line>
+    <line id="axis-x" class="axis-line" marker-end="url(#axis-arrow)"></line>
+    <line id="axis-y" class="axis-line" marker-end="url(#axis-arrow)"></line>
+    <line id="axis-z" class="axis-line" marker-end="url(#axis-arrow)"></line>
+    <text id="axis-x-label" class="axis-label">f(α₀)</text>
+    <text id="axis-y-label" class="axis-label">f(α₁)</text>
+    <text id="axis-z-label" class="axis-label">f(α₂)</text>
+    <circle id="output-origin" class="origin-point" r="3.5"></circle>
+    <line id="code-vector" class="vector-line" marker-end="url(#vector-arrow)"></line>
+    <text id="code-label" class="point-label">Vℒa</text>
+    <text id="plane-label" class="plane-label">im(Vℒ)</text>
+    <rect id="orbit-zone" class="orbit-zone" x="550" y="68" width="525" height="390"></rect>
+    <g id="affine-line-group" class="affine-line-group" style="display:none">
+      <line id="affine-line" class="ambient-affine-line"></line>
+      <circle id="affine-f0" class="affine-point" r="7"></circle>
+      <circle id="affine-f1" class="affine-point" r="7"></circle>
+      <text id="affine-f0-label" class="affine-point-label">f₀</text>
+      <text id="affine-f1-label" class="affine-point-label">f₁</text>
+    </g>
+  </g>
+</svg>
+</div>
+
+<div class="map-readout" aria-live="polite">
+  <span id="input-readout">a = (0.70, −0.45)</span>
+  <span id="code-readout">Vℒa = (1.15, 0.70, 0.25)</span>
+</div>
+
+<section id="hamming-distance" class="hamming-section">
+<h2>Hamming distance</h2>
+<div class="hamming-controls">
+  <button id="hamming-randomize" class="hamming-randomize" type="button">new random vectors</button>
+</div>
+<div id="hamming-diagram" class="hamming-diagram">
+  <div class="hamming-vector">
+    <span class="hamming-vector-name">u</span>
+    <div class="hamming-vector-body" id="hamming-u">
+      <span class="hamming-entry" data-hamming-u="0"></span>
+      <span class="hamming-entry" data-hamming-u="1"></span>
+      <span class="hamming-entry" data-hamming-u="2"></span>
+      <span class="hamming-entry" data-hamming-u="3"></span>
+      <span class="hamming-entry" data-hamming-u="4"></span>
+      <span class="hamming-entry" data-hamming-u="5"></span>
+    </div>
+  </div>
+  <div class="hamming-relations" aria-hidden="true">
+    <span></span>
+    <span class="hamming-relation" data-hamming-relation="0"></span>
+    <span class="hamming-relation" data-hamming-relation="1"></span>
+    <span class="hamming-relation" data-hamming-relation="2"></span>
+    <span class="hamming-relation" data-hamming-relation="3"></span>
+    <span class="hamming-relation" data-hamming-relation="4"></span>
+    <span class="hamming-relation" data-hamming-relation="5"></span>
+  </div>
+  <div class="hamming-vector">
+    <span class="hamming-vector-name">v</span>
+    <div class="hamming-vector-body" id="hamming-v">
+      <span class="hamming-entry" data-hamming-v="0"></span>
+      <span class="hamming-entry" data-hamming-v="1"></span>
+      <span class="hamming-entry" data-hamming-v="2"></span>
+      <span class="hamming-entry" data-hamming-v="3"></span>
+      <span class="hamming-entry" data-hamming-v="4"></span>
+      <span class="hamming-entry" data-hamming-v="5"></span>
+    </div>
+  </div>
+</div>
+<div id="hamming-result" class="hamming-result" aria-live="polite">d<sub>H</sub>(u,v) = ?</div>
+<p><span class="math display">\[
+d_H(u,v)
+=
+\left|\left\{i\in\{0,\ldots,n-1\}:u_i\neq v_i\right\}\right|.
+\]</span></p>
+</section>
+<section id="agreement-along-an-affine-line" class="agreement-section">
+<h2>Agreement along an affine line</h2>
+<p><span class="math display">\[
+\begin{gathered}
+\mathbb F_7,\qquad \mathcal L=\{0,1,2,3,4,5,6\},\qquad
+f_\lambda=f_0+\lambda f_1,\\[-2pt]
+\operatorname{ev}_{\mathcal L}(f_0)=(0,2,3,0,3,3,4),\\[-2pt]
+\operatorname{ev}_{\mathcal L}(f_1)=(4,2,6,2,5,4,3).
+\end{gathered}
+\]</span></p>
+<div class="eta-control">
+  <label for="eta-errors">η = <output id="eta-value" for="eta-errors">3/7</output></label>
+  <input id="eta-errors" type="range" min="0" max="3" step="1" value="3" aria-label="Maximum relative Hamming error">
+</div>
+<div class="affine-family-scroll">
+  <div class="affine-family">
+    <div id="family-support-columns" class="family-support-columns"></div>
+    <div id="family-axis" class="family-axis" aria-label="Scalars on the affine line"></div>
+    <div class="family-axis-name">λ ∈ 𝔽₇</div>
+  </div>
+</div>
+<div id="family-detail" class="family-detail" aria-live="polite">
+  <div id="family-point-polynomial"></div>
+  <div id="family-point-word"></div>
+  <div id="family-codeword"></div>
+  <div id="family-codeword-word"></div>
+  <div id="family-support-detail" class="family-support-detail"></div>
+</div>
+</section>
+<section id="proximity-gaps-vs.-ca-vs.-mca" class="comparison-section">
+<h2>Proximity gaps vs.&nbsp;CA vs.&nbsp;MCA</h2>
+<p><strong>Proximity gaps.</strong> A line either has every point <span class="math inline">\(\delta\)</span>-close to <span class="math inline">\(\mathcal C\)</span>, or only an <span class="math inline">\(\varepsilon_{\mathrm{pg}}(\mathcal C,\delta)\)</span>-fraction of its scalars are <span class="math inline">\(\delta\)</span>-close.</p>
+<p><strong>Correlated agreement (CA).</strong> If sufficiently many scalars are <span class="math inline">\(\delta\)</span>-close, then <span class="math inline">\(f_0\)</span> and <span class="math inline">\(f_1\)</span> have one common large agreement support.</p>
+<p><strong>Mutual correlated agreement (MCA).</strong> Outside an <span class="math inline">\(\varepsilon_{\mathrm{mca}}(\mathcal C,\delta)\)</span>-fraction of scalars, every large agreement support of <span class="math inline">\(f_\lambda\)</span> is already a common support of <span class="math inline">\(f_0\)</span> and <span class="math inline">\(f_1\)</span>.</p>
+</section>
+<section id="grand-mca-challenge" class="formal-section">
+<h2>Grand MCA Challenge</h2>
+<div class="epsilon-definitions">
+<p><span class="math display">\[
+f_\lambda=f_0+\lambda f_1,
+\qquad
+f_0,f_1\in\mathbb F^n,
+\qquad
+\Delta(f,\mathcal C):=\min_{c\in\mathcal C}\Delta(f,c),
+\]</span></p>
+<p><span class="math display">\[
+\operatorname{Close}_\delta(f)
+\iff
+\exists c\in\mathcal C:\Delta(f,c)\leq\delta.
+\]</span></p>
+<p><strong>Proximity gaps</strong></p>
+<p><span class="math display">\[
+\varepsilon_{\mathrm{pg}}(\mathcal C,\delta)
+:=
+\max_{\substack{
+f_0,f_1\in\mathbb F^n\\
+\exists\lambda_0\in\mathbb F:
+\Delta(f_{\lambda_0},\mathcal C)&gt;\delta
+}}
+\Pr_{\lambda\leftarrow\mathbb F}
+\left[
+\Delta(f_\lambda,\mathcal C)\leq\delta
+\right].
+\]</span></p>
+<p><strong>Correlated agreement</strong></p>
+<p><span class="math display">\[
+\operatorname{Corr}_\delta(f_0,f_1)
+\iff
+\begin{gathered}
+\exists S\subseteq[n],\quad |S|\geq(1-\delta)n,\quad
+\exists c_0,c_1\in\mathcal C:\\
+f_0|_S=c_0|_S
+\quad\text{and}\quad
+f_1|_S=c_1|_S.
+\end{gathered}
+\]</span></p>
+<p><span class="math display">\[
+\varepsilon_{\mathrm{ca}}(\mathcal C,\delta)
+:=
+\max_{\substack{
+f_0,f_1\in\mathbb F^n\\
+\neg\operatorname{Corr}_\delta(f_0,f_1)
+}}
+\Pr_{\lambda\leftarrow\mathbb F}
+\left[
+\Delta(f_\lambda,\mathcal C)\leq\delta
+\right].
+\]</span></p>
+<p><strong>Mutual correlated agreement</strong></p>
+<p><span class="math display">\[
+\operatorname{Bad}_{\mathrm{mca}}(f_0,f_1,\lambda,\delta)
+\iff
+\begin{gathered}
+\exists S\subseteq[n],\quad |S|\geq(1-\delta)n,\quad
+\exists c\in\mathcal C:\ f_\lambda|_S=c|_S,\\
+\nexists c_0,c_1\in\mathcal C:
+\quad
+f_0|_S=c_0|_S
+\ \land\
+f_1|_S=c_1|_S.
+\end{gathered}
+\]</span></p>
+<p><span class="math display">\[
+\varepsilon_{\mathrm{mca}}(\mathcal C,\delta)
+:=
+\max_{f_0,f_1\in\mathbb F^n}
+\Pr_{\lambda\leftarrow\mathbb F}
+\left[
+\operatorname{Bad}_{\mathrm{mca}}(f_0,f_1,\lambda,\delta)
+\right].
+\]</span></p>
+<p><span class="math display">\[
+\varepsilon_{\mathrm{pg}}(\mathcal C,\delta)
+\leq
+\varepsilon_{\mathrm{ca}}(\mathcal C,\delta)
+\leq
+\varepsilon_{\mathrm{mca}}(\mathcal C,\delta).
+\]</span></p>
+</div>
+<div class="grand-mca-statement">
+<p><strong>The grand MCA challenge</strong> (<a href="https://eprint.iacr.org/2026/680">ABF 2026</a>; <a href="https://proximityprize.org/">Proximity Prize</a>). We are given a Reed–Solomon code <span class="math inline">\(\mathcal C:=\operatorname{RS}[\mathbb F,\mathcal L,k]\)</span> defined over some smooth evaluation domain <span class="math inline">\(\mathcal L\subseteq\mathbb F\)</span>. The code has constant rate, and in particular the rate <span class="math inline">\(\rho(\mathcal C):=k/|\mathcal L|\)</span> is one of <span class="math inline">\(\left\{\frac12,\frac14,\frac18,\frac1{16}\right\}\)</span>. For a given <span class="math inline">\(\varepsilon^*\)</span>, say <span class="math inline">\(\varepsilon^*=2^{-128}\)</span>, determine the largest <span class="math inline">\(\delta_{\mathcal C}^*\in[0,1]\)</span> such that <span class="math inline">\(\varepsilon_{\mathrm{mca}}(\mathcal C,\delta_{\mathcal C}^*)\leq\varepsilon^*\)</span>, assuming <span class="math inline">\(|\mathbb F|\)</span> is sufficiently large so that such a <span class="math inline">\(\delta_{\mathcal C}^*\)</span> exists.</p>
+</div>
+</section>
+<section id="locator-polynomial-mechanisms-to-attack-correlated-agreement-kkh-2026-kam-2026" class="locator-section">
+<h2>Locator Polynomial Mechanisms to attack Correlated Agreement (<a href="https://eprint.iacr.org/2026/782">KKH 2026</a>; <a href="https://arxiv.org/abs/2604.09724">Kam 2026</a>)</h2>
+<section id="step-0.-lets-fix-concrete-parameters" class="locator-stage">
+<h3>Step 0. Let’s fix concrete parameters</h3>
+<p>Say we work over</p>
+<p><span class="math display">\[
+\mathbb F=\mathbb F_{13},
+\qquad
+\mathcal L=\mathbb F_{13}^{\times}=\{1,\ldots,12\},
+\qquad
+k=3.
+\]</span></p>
+<p><span class="math display">\[
+\mathcal C
+=
+\operatorname{RS}(\mathbb F_{13},\mathcal L,3)
+=
+\left\{\operatorname{ev}_{\mathcal L}(p):\deg p&lt;3\right\}.
+\]</span></p>
+</section>
+<section id="step-1.-the-first-trick-is-to-move-to-a-smaller-domain" class="locator-stage">
+<h3>Step 1. The first trick is to move to a smaller domain</h3>
+<p>Consider</p>
+<p><span class="math display">\[
+\pi:\mathcal L\longrightarrow G,
+\qquad
+\pi(x)=x^3,
+\qquad
+G=\pi(\mathcal L)=\{1,5,8,12\}.
+\]</span></p>
+<p>Every point of <span class="math inline">\(G\)</span> has exactly three preimages:</p>
+<p><span class="math display">\[
+\begin{array}{c|cccc}
+a&amp;1&amp;5&amp;8&amp;12\\ \hline
+\pi^{-1}(a)
+&amp;\{1,3,9\}
+&amp;\{7,8,11\}
+&amp;\{2,5,6\}
+&amp;\{4,10,12\}.
+\end{array}
+\]</span></p>
+</section>
+<section id="step-2.-compute-every-locator-of-fixed-size-subsets" class="locator-stage">
+<h3>Step 2. Compute every locator of fixed-size subsets</h3>
+<p>Fix <span class="math inline">\(r=2\)</span>. For every <span class="math inline">\(S\in\binom{G}{2}\)</span>, define</p>
+<p><span class="math display">\[
+L_S(Y)
+=
+\prod_{a\in S}(Y-a)
+=
+Y^2-e_1(S)Y+e_2(S),
+\]</span></p>
+<p>where all coefficients are in <span class="math inline">\(\mathbb F_{13}\)</span>. The six possibilities are</p>
+<p><span class="math display">\[
+\begin{array}{c|c|c|c}
+S&amp;e_1(S)&amp;e_2(S)&amp;L_S(Y)\\ \hline
+\{1,5\}&amp;6&amp;5&amp;Y^2-6Y+5\\
+\{1,8\}&amp;9&amp;8&amp;Y^2-9Y+8\\
+\{1,12\}&amp;0&amp;12&amp;Y^2+12\\
+\{5,8\}&amp;0&amp;1&amp;Y^2+1\\
+\{5,12\}&amp;4&amp;8&amp;Y^2-4Y+8\\
+\{8,12\}&amp;7&amp;5&amp;Y^2-7Y+5.
+\end{array}
+\]</span></p>
+<p>Every locator splits into a point on one affine line and a constant:</p>
+<p><span class="math display">\[
+L_S(Y)
+=
+\underbrace{Y^2-e_1(S)Y}_{u_{e_1(S)}(Y)}
+-
+\underbrace{\bigl(-e_2(S)\bigr)}_{\text{constant codeword}}.
+\]</span></p>
+</section>
+<section id="step-3.-putting-everything-together" class="locator-stage">
+<h3>Step 3. Putting everything together</h3>
+<p>Write</p>
+<p><span class="math display">\[
+E_1(G,2)
+:=
+\left\{e_1(S):S\in\binom{G}{2}\right\}
+=
+\{0,4,6,7,9\}.
+\]</span></p>
+<p>For every <span class="math inline">\(\lambda\in E_1(G,2)\)</span>, choose an <span class="math inline">\(S\)</span> with <span class="math inline">\(e_1(S)=\lambda\)</span> and set</p>
+<p><span class="math display">\[
+u_\lambda(Y)=Y^2-\lambda Y,
+\qquad
+c_S(Y)=-e_2(S).
+\]</span></p>
+<p>Since <span class="math inline">\(c_S\)</span> is constant, it is a codeword polynomial. Since every <span class="math inline">\(a\in S\)</span> is a root of <span class="math inline">\(L_S\)</span>,</p>
+<p><span class="math display">\[
+0=L_S(a)
+=
+u_\lambda(a)-c_S(a),
+\]</span></p>
+<p>and therefore</p>
+<p><span class="math display">\[
+S\subseteq
+\operatorname{Agree}(u_\lambda,c_S).
+\]</span></p>
+<p>Thus five distinct scalars give points on the line</p>
+<p><span class="math display">\[
+\left\{Y^2-\lambda Y:\lambda\in\mathbb F_{13}\right\}
+\]</span></p>
+<p>with agreement on <span class="math inline">\(|S|/|G|=1/2\)</span> of the small domain.</p>
+<p>There is still one fatal issue: if we use this line directly over <span class="math inline">\(\mathcal L\)</span>, then both basis polynomials <span class="math inline">\(Y^2\)</span> and <span class="math inline">\(-Y\)</span> have degree below <span class="math inline">\(k=3\)</span>. They are themselves codeword polynomials, so correlated agreement holds trivially on all of <span class="math inline">\(\mathcal L\)</span>. Inflation removes this trivial common explanation while preserving the agreement fraction.</p>
+</section>
+<section id="step-4.-inflation-makes-the-construction-work" class="locator-stage">
+<h3>Step 4. Inflation makes the construction work</h3>
+<p>Substitute <span class="math inline">\(Y=X^3\)</span>:</p>
+<p><span class="math display">\[
+L_S(X^3)
+=
+\underbrace{X^6-e_1(S)X^3}_{f_{e_1(S)}(X)}
+-
+\underbrace{\bigl(-e_2(S)\bigr)}_{c_S(X)}.
+\]</span></p>
+<p>From here on, identify each polynomial with its evaluation word on <span class="math inline">\(\mathcal L\)</span>. The ambient affine line is now</p>
+<p><span class="math display">\[
+f_\lambda(X)
+=
+\underbrace{X^6}_{f_0(X)}
++
+\lambda\underbrace{(-X^3)}_{f_1(X)}.
+\]</span></p>
+<p>Neither <span class="math inline">\(f_0\)</span> nor <span class="math inline">\(f_1\)</span> has degree below <span class="math inline">\(k=3\)</span>. Meanwhile, the codeword part <span class="math inline">\(c_S=-e_2(S)\)</span> remains constant.</p>
+<p>For each <span class="math inline">\(\lambda=e_1(S)\)</span>,</p>
+<p><span class="math display">\[
+L_S(x^3)=0
+\iff
+x^3\in S
+\iff
+x\in\pi^{-1}(S)
+\Longrightarrow
+f_\lambda(x)=c_S(x).
+\]</span></p>
+<p>Because <span class="math inline">\(\pi\)</span> is three-to-one,</p>
+<p><span class="math display">\[
+|\pi^{-1}(S)|=3|S|=6,
+\qquad
+\frac{|\pi^{-1}(S)|}{|\mathcal L|}
+=
+\frac{6}{12}
+=
+\frac{|S|}{|G|}
+=
+\frac{2}{4}.
+\]</span></p>
+<p>Hence every <span class="math inline">\(\lambda\in E_1(G,2)\)</span> satisfies</p>
+<p><span class="math display">\[
+\Delta(f_\lambda,\mathcal C)\leq\frac12.
+\]</span></p>
+<p>But <span class="math inline">\(f_0\)</span> and <span class="math inline">\(f_1\)</span> cannot have correlated agreement on six coordinates. Indeed, for every polynomial <span class="math inline">\(p_1\)</span> with <span class="math inline">\(\deg p_1&lt;3\)</span>,</p>
+<p><span class="math display">\[
+f_1(X)-p_1(X)=-X^3-p_1(X)
+\]</span></p>
+<p>is a nonzero polynomial of degree <span class="math inline">\(3\)</span>, so it has at most three roots. Therefore</p>
+<p><span class="math display">\[
+\neg\operatorname{Corr}_{1/2}(f_0,f_1).
+\]</span></p>
+<p>We have produced a genuine correlated-agreement counterexample:</p>
+<p><span class="math display">\[
+\Pr_{\lambda\leftarrow\mathbb F_{13}}
+\left[\Delta(f_\lambda,\mathcal C)\leq\frac12\right]
+\geq
+\frac{|E_1(G,2)|}{13}
+=
+\frac5{13},
+\]</span></p>
+<p>and consequently</p>
+<p><span class="math display">\[
+\varepsilon_{\mathrm{ca}}\!\left(\mathcal C,\frac12\right)
+\geq
+\frac5{13}.
+\]</span></p>
+</section>
+<section id="the-general-mechanism" class="locator-stage">
+<h3>The general mechanism</h3>
+<p>Suppose <span class="math inline">\(x\mapsto x^m\)</span> maps <span class="math inline">\(\mathcal L\)</span> onto <span class="math inline">\(G\)</span> exactly <span class="math inline">\(m\)</span>-to-one, and choose an <span class="math inline">\(r\)</span>-subset <span class="math inline">\(S\subseteq G\)</span>. Then</p>
+<p><span class="math display">\[
+L_S(X^m)
+=
+\underbrace{X^{rm}-e_1(S)X^{(r-1)m}}_{f_{e_1(S)}(X)}
++
+\underbrace{R_S(X^m)}_{\deg\leq(r-2)m}.
+\]</span></p>
+<p>Choose the code cutoff so that</p>
+<p><span class="math display">\[
+(r-2)m&lt;k\leq(r-1)m.
+\]</span></p>
+<p>The first inequality makes <span class="math inline">\(-R_S(X^m)\)</span> a codeword polynomial. The second pushes the line direction <span class="math inline">\(-X^{(r-1)m}\)</span> outside the code and bounds its agreement with every codeword by <span class="math inline">\((r-1)m\)</span> coordinates.</p>
+<p>At the same time,</p>
+<p><span class="math display">\[
+\frac{|\pi^{-1}(S)|}{|\mathcal L|}
+=
+\frac{|S|}{|G|}.
+\]</span></p>
+<p>Since <span class="math inline">\(rm&gt;(r-1)m\)</span>, the pair cannot have correlated agreement on a support as large as <span class="math inline">\(\pi^{-1}(S)\)</span>. Thus, with</p>
+<p><span class="math display">\[
+\delta=1-\frac{r}{|G|},
+\qquad
+E_1(G,r)
+=
+\left\{e_1(S):S\in\binom{G}{r}\right\},
+\]</span></p>
+<p>the construction gives</p>
+<p><span class="math display">\[
+\varepsilon_{\mathrm{ca}}(\mathcal C,\delta)
+\geq
+\frac{|E_1(G,r)|}{|\mathbb F|}.
+\]</span></p>
+<p><strong>The problem solved by KKH is to explicitly choose <span class="math inline">\(G\)</span> and <span class="math inline">\(r\)</span>, for suitably large generic primes, so that <span class="math inline">\(E_1(G,r)\)</span> is large.</strong></p>
+<p>Concretely, for <span class="math inline">\(1\leq r\leq |G|/2\)</span>, they pair the elements of <span class="math inline">\(G\)</span> as <span class="math inline">\(\{a,-a\}\)</span>, choose <span class="math inline">\(r\)</span> distinct pairs, and select one signed representative from each pair. For suitably large primes, these choices give distinct sums, yielding</p>
+<p><span class="math display">\[
+|E_1(G,r)|
+\geq
+2^r\binom{|G|/2}{r}.
+\]</span></p>
+<p>After inflation, every selected <span class="math inline">\(a\in G\)</span> represents the full coset <span class="math inline">\(\pi^{-1}(a)\)</span> of <span class="math inline">\(\ker(\pi)\)</span> inside <span class="math inline">\(\mathcal L\)</span>.</p>
+</section>
+<section id="extension-the-higher-moment-problem" class="locator-stage locator-next">
+<h3>Extension: the higher-moment problem</h3>
+<p>The full locator expansion is</p>
+<p><span class="math display">\[
+L_S(X^m)
+=
+\sum_{j=0}^{r}
+(-1)^j e_j(S)X^{(r-j)m},
+\qquad
+e_0(S)=1.
+\]</span></p>
+<p>Suppose we lower the code cutoff so that the first <span class="math inline">\(t+1\)</span> terms remain outside the code:</p>
+<p><span class="math display">\[
+(r-t-1)m&lt;k\leq(r-t)m.
+\]</span></p>
+<p>Then</p>
+<p><span class="math display">\[
+L_S(X^m)
+=
+\underbrace{
+X^{rm}
+-e_1(S)X^{(r-1)m}
++e_2(S)X^{(r-2)m}
+-\cdots+
+(-1)^t e_t(S)X^{(r-t)m}
+}_{\text{ambient point}}
++
+\underbrace{R_{S,t}(X^m)}_{\deg\leq(r-t-1)m}.
+\]</span></p>
+<p>Fix values <span class="math inline">\(\beta_2,\ldots,\beta_t\)</span> and consider the common fiber</p>
+<p><span class="math display">\[
+\mathcal S_{\boldsymbol\beta}
+:=
+\left\{
+S\in\binom{G}{r}:
+e_j(S)=\beta_j
+\text{ for }2\leq j\leq t
+\right\}.
+\]</span></p>
+<p>Across this fiber, every coefficient except <span class="math inline">\(e_1(S)\)</span> is fixed. Hence the ambient points lie on the single affine line</p>
+<p><span class="math display">\[
+f_\lambda(X)
+=
+\underbrace{
+X^{rm}
++\sum_{j=2}^{t}
+(-1)^j\beta_jX^{(r-j)m}
+}_{f_0(X)}
++
+\lambda\underbrace{\left(-X^{(r-1)m}\right)}_{f_1(X)},
+\qquad
+\lambda=e_1(S).
+\]</span></p>
+<p>Define the first-moment image of this fiber by</p>
+<p><span class="math display">\[
+E_1(G,r;\boldsymbol\beta)
+:=
+\left\{
+e_1(S):S\in\mathcal S_{\boldsymbol\beta}
+\right\}.
+\]</span></p>
+<p>Exactly as before, each <span class="math inline">\(\lambda\in E_1(G,r;\boldsymbol\beta)\)</span> gives a point close to <span class="math inline">\(\mathcal C\)</span> on the lifted support <span class="math inline">\(\pi^{-1}(S)\)</span>, while the direction <span class="math inline">\(f_1\)</span> prevents correlated agreement on a support that large. Therefore</p>
+<p><span class="math display">\[
+\varepsilon_{\mathrm{ca}}(\mathcal C,\delta)
+\geq
+\frac{|E_1(G,r;\boldsymbol\beta)|}{|\mathbb F|},
+\qquad
+\delta=1-\frac{r}{|G|}.
+\]</span></p>
+<p>What gap does this give? Write <span class="math inline">\(s=|G|\)</span> and <span class="math inline">\(n=m s\)</span>. Since <span class="math inline">\(\rho=k/n\)</span> and <span class="math inline">\(\delta=1-r/s\)</span>,</p>
+<p><span class="math display">\[
+(1-\rho)-\delta
+=
+\frac{r}{s}-\frac{k}{ms}.
+\]</span></p>
+<p>Under the cutoff <span class="math inline">\((r-t-1)m&lt;k\leq(r-t)m\)</span>, this lies in the interval</p>
+<p><span class="math display">\[
+\frac{t}{|G|}
+\leq
+(1-\rho)-\delta
+&lt;
+\frac{t+1}{|G|}.
+\]</span></p>
+<p>At the natural endpoint <span class="math inline">\(k=(r-t)m\)</span>, the parameters are exactly</p>
+<p><span class="math display">\[
+\rho=\frac{r-t}{|G|},
+\qquad
+\delta=1-\frac{r}{|G|}
+=(1-\rho)-\frac{t}{|G|}.
+\]</span></p>
+<p>Thus the naïve higher-moment construction gives a bad CA line <span class="math inline">\(t/|G|\)</span> below capacity. The case <span class="math inline">\(t=1\)</span> recovers the KKH gap <span class="math inline">\(1/|G|\)</span> below capacity.</p>
+<p><strong>Higher-moment problem.</strong> Can we find a large fiber on which <span class="math inline">\(e_2(S),\ldots,e_t(S)\)</span> are fixed while <span class="math inline">\(e_1(S)\)</span> still takes many distinct values?</p>
+</section>
+</section>
+</div>
+</section>
+<script>
+(() => {
+  const svg = document.getElementById('linear-map-3d');
+  if (!svg) return;
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const coeffPoint = document.getElementById('coeff-point');
+  const coeffLabel = document.getElementById('coeff-label');
+  const inputVector = document.getElementById('input-vector');
+  const codePlane = document.getElementById('code-plane');
+  const planeGrid = document.getElementById('plane-grid');
+  const codeVector = document.getElementById('code-vector');
+  const codeLabel = document.getElementById('code-label');
+  const planeLabel = document.getElementById('plane-label');
+  const outputOrigin = document.getElementById('output-origin');
+  const inputReadout = document.getElementById('input-readout');
+  const codeReadout = document.getElementById('code-readout');
+  const orbitZone = document.getElementById('orbit-zone');
+  const affineLineToggle = document.getElementById('affine-line-toggle');
+  const affineLineGroup = document.getElementById('affine-line-group');
+  const affineLine = document.getElementById('affine-line');
+  const affineF0Point = document.getElementById('affine-f0');
+  const affineF1Point = document.getElementById('affine-f1');
+  const affineF0Label = document.getElementById('affine-f0-label');
+  const affineF1Label = document.getElementById('affine-f1-label');
+  const hammingRandomize = document.getElementById('hamming-randomize');
+  const hammingResult = document.getElementById('hamming-result');
+  const hammingUEntries = Array.from(document.querySelectorAll('[data-hamming-u]'));
+  const hammingVEntries = Array.from(document.querySelectorAll('[data-hamming-v]'));
+  const hammingRelations = Array.from(document.querySelectorAll('[data-hamming-relation]'));
+  const familySupportColumns = document.getElementById('family-support-columns');
+  const familyAxis = document.getElementById('family-axis');
+  const familyPointPolynomial = document.getElementById('family-point-polynomial');
+  const familyPointWord = document.getElementById('family-point-word');
+  const familyCodeword = document.getElementById('family-codeword');
+  const familyCodewordWord = document.getElementById('family-codeword-word');
+  const familySupportDetail = document.getElementById('family-support-detail');
+  const etaErrors = document.getElementById('eta-errors');
+  const etaValue = document.getElementById('eta-value');
+
+  const axes = [
+    { positive: document.getElementById('axis-x'), negative: document.getElementById('axis-x-negative'), label: document.getElementById('axis-x-label'), vector: [1, 0, 0] },
+    { positive: document.getElementById('axis-y'), negative: document.getElementById('axis-y-negative'), label: document.getElementById('axis-y-label'), vector: [0, 1, 0] },
+    { positive: document.getElementById('axis-z'), negative: document.getElementById('axis-z-negative'), label: document.getElementById('axis-z-label'), vector: [0, 0, 1] }
+  ];
+
+  const planeLines = [];
+  for (let i = -3; i <= 3; i += 1) {
+    const lineA = document.createElementNS(NS, 'line');
+    const lineB = document.createElementNS(NS, 'line');
+    lineA.setAttribute('class', i === 0 ? 'plane-grid-line plane-grid-axis' : 'plane-grid-line');
+    lineB.setAttribute('class', i === 0 ? 'plane-grid-line plane-grid-axis' : 'plane-grid-line');
+    planeGrid.append(lineA, lineB);
+    planeLines.push({ element: lineA, kind: 'a0', value: i * 0.5 });
+    planeLines.push({ element: lineB, kind: 'a1', value: i * 0.5 });
+  }
+
+  let a0 = 0.7;
+  let a1 = -0.45;
+  let yaw = -0.72;
+  let pitch = 0.54;
+  let mode = null;
+  let activePointer = null;
+  let lastClientX = 0;
+  let lastClientY = 0;
+  let lastSvgX = 0;
+  let lastSvgY = 0;
+  let affineLineVisible = false;
+  const affineF0 = [0.25, 1.15, -0.65];
+  const affineF1 = [1.07, 1.43, -1.15];
+  let hammingU = [];
+  let hammingV = [];
+  const familyF0 = [0, 3, 5, 6, 6, 4, 6];
+  const familyF1 = [4, 1, 3, 3, 4, 6, 2];
+  const agreementData = [
+    { lambda: 0, word: [0,2,3,0,3,3,4] },
+    { lambda: 1, word: [4,4,2,2,1,0,0] },
+    { lambda: 2, word: [1,6,1,4,6,4,3] },
+    { lambda: 3, word: [5,1,0,6,4,1,6] },
+    { lambda: 4, word: [2,3,6,1,2,5,2] },
+    { lambda: 5, word: [6,5,5,3,0,2,5] },
+    { lambda: 6, word: [3,0,4,5,5,6,1] }
+  ];
+  const quadraticCodewords = [];
+  for (let constant = 0; constant < 7; constant += 1) {
+    for (let linear = 0; linear < 7; linear += 1) {
+      for (let quadratic = 0; quadratic < 7; quadratic += 1) {
+        const coeff = [constant, linear, quadratic];
+        const word = Array.from({ length: 7 }, (_, x) => (constant + linear * x + quadratic * x * x) % 7);
+        quadraticCodewords.push({ coeff, word });
+      }
+    }
+  }
+
+  const inputOrigin = { x: 195, y: 275 };
+  const outputCenter = { x: 815, y: 282 };
+  const inputScale = 85;
+  const outputScale = 62;
+  const planeExtent = 1.65;
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const clean = value => Math.abs(value) < 0.005 ? 0 : value;
+  const fixed = value => clean(value).toFixed(2).replace('-', '−');
+
+  function codeword(x0, x1) {
+    return [x0 - x1, x0, x0 + x1];
+  }
+
+  function project(point) {
+    const [x, y, z] = point;
+    const cosYaw = Math.cos(yaw);
+    const sinYaw = Math.sin(yaw);
+    const cosPitch = Math.cos(pitch);
+    const sinPitch = Math.sin(pitch);
+    const rotatedX = cosYaw * x + sinYaw * z;
+    const depthAfterYaw = -sinYaw * x + cosYaw * z;
+    const rotatedY = cosPitch * y - sinPitch * depthAfterYaw;
+    const depth = sinPitch * y + cosPitch * depthAfterYaw;
+    const perspective = 1 / (1 + depth / 13);
+    return {
+      x: outputCenter.x + outputScale * perspective * rotatedX,
+      y: outputCenter.y - outputScale * perspective * rotatedY,
+      depth
+    };
+  }
+
+  function setLine(element, start, end) {
+    element.setAttribute('x1', start.x);
+    element.setAttribute('y1', start.y);
+    element.setAttribute('x2', end.x);
+    element.setAttribute('y2', end.y);
+  }
+
+  function setCircle(element, point) {
+    element.setAttribute('cx', point.x);
+    element.setAttribute('cy', point.y);
+  }
+
+  function setText(element, point, dx, dy) {
+    element.setAttribute('x', point.x + dx);
+    element.setAttribute('y', point.y + dy);
+  }
+
+  function updateInput() {
+    const tip = {
+      x: inputOrigin.x + inputScale * a0,
+      y: inputOrigin.y - inputScale * a1
+    };
+    setLine(inputVector, inputOrigin, tip);
+    setCircle(coeffPoint, tip);
+    setText(coeffLabel, tip, 14, -13);
+    coeffPoint.setAttribute('aria-valuetext', `a zero ${fixed(a0)}, a one ${fixed(a1)}`);
+  }
+
+  function updatePlane() {
+    const corners = [
+      codeword(-planeExtent, -planeExtent),
+      codeword(planeExtent, -planeExtent),
+      codeword(planeExtent, planeExtent),
+      codeword(-planeExtent, planeExtent)
+    ].map(project);
+    codePlane.setAttribute('points', corners.map(point => `${point.x},${point.y}`).join(' '));
+
+    planeLines.forEach(item => {
+      const start = item.kind === 'a0'
+        ? project(codeword(item.value, -planeExtent))
+        : project(codeword(-planeExtent, item.value));
+      const end = item.kind === 'a0'
+        ? project(codeword(item.value, planeExtent))
+        : project(codeword(planeExtent, item.value));
+      setLine(item.element, start, end);
+    });
+
+    const origin = project([0, 0, 0]);
+    setCircle(outputOrigin, origin);
+    axes.forEach(axis => {
+      const positive = project(axis.vector.map(value => value * 2.25));
+      const negative = project(axis.vector.map(value => value * -2.25));
+      setLine(axis.positive, origin, positive);
+      setLine(axis.negative, origin, negative);
+      setText(axis.label, positive, 7, -7);
+    });
+
+    const mapped = project(codeword(a0, a1));
+    setLine(codeVector, origin, mapped);
+    setText(codeLabel, mapped, 13, -11);
+
+    const labelCorner = project(codeword(planeExtent, planeExtent));
+    setText(planeLabel, labelCorner, -8, -13);
+    updateAffineLine();
+  }
+
+  function affinePoint(amount) {
+    return affineF0.map((value, index) => value + amount * (affineF1[index] - value));
+  }
+
+  function updateAffineLine() {
+    if (!affineLineVisible) return;
+    const start = project(affinePoint(-2.3));
+    const end = project(affinePoint(3.3));
+    const f0 = project(affineF0);
+    const f1 = project(affineF1);
+    setLine(affineLine, start, end);
+    setCircle(affineF0Point, f0);
+    setCircle(affineF1Point, f1);
+    setText(affineF0Label, f0, -20, -12);
+    setText(affineF1Label, f1, 11, -12);
+  }
+
+  function updateReadout() {
+    const [c0, c1, c2] = codeword(a0, a1);
+    inputReadout.textContent = `a = (${fixed(a0)}, ${fixed(a1)})`;
+    codeReadout.textContent = `Vℒa = (${fixed(c0)}, ${fixed(c1)}, ${fixed(c2)})`;
+  }
+
+  function update() {
+    updateInput();
+    updatePlane();
+    updateReadout();
+  }
+
+  function svgPoint(event) {
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    return point.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  function moveCoefficient(event) {
+    const point = svgPoint(event);
+    a0 = clamp((point.x - inputOrigin.x) / inputScale, -1.5, 1.5);
+    a1 = clamp((inputOrigin.y - point.y) / inputScale, -1.5, 1.5);
+    update();
+  }
+
+  svg.addEventListener('pointerdown', event => {
+    const point = svgPoint(event);
+    activePointer = event.pointerId;
+    svg.setPointerCapture(activePointer);
+    if (event.target === affineF0Point || event.target === affineF1Point) {
+      mode = event.target === affineF0Point ? 'affine-f0' : 'affine-f1';
+      lastSvgX = point.x;
+      lastSvgY = point.y;
+    } else if (point.x < 370) {
+      mode = 'coefficient';
+      moveCoefficient(event);
+    } else if (point.x > 545) {
+      mode = 'orbit';
+      lastClientX = event.clientX;
+      lastClientY = event.clientY;
+    }
+  });
+
+  svg.addEventListener('pointermove', event => {
+    if (event.pointerId !== activePointer) return;
+    if (mode === 'coefficient') {
+      moveCoefficient(event);
+    } else if (mode === 'affine-f0' || mode === 'affine-f1') {
+      const point = svgPoint(event);
+      const dx = (point.x - lastSvgX) / outputScale;
+      const dy = (point.y - lastSvgY) / outputScale;
+      const cosYaw = Math.cos(yaw);
+      const sinYaw = Math.sin(yaw);
+      const cosPitch = Math.cos(pitch);
+      const sinPitch = Math.sin(pitch);
+      const screenRight = [cosYaw, 0, sinYaw];
+      const screenUp = [sinPitch * sinYaw, cosPitch, -sinPitch * cosYaw];
+      const draggedPoint = mode === 'affine-f0' ? affineF0 : affineF1;
+      draggedPoint.forEach((value, index) => {
+        draggedPoint[index] = value + screenRight[index] * dx - screenUp[index] * dy;
+      });
+      lastSvgX = point.x;
+      lastSvgY = point.y;
+      updateAffineLine();
+    } else if (mode === 'orbit') {
+      yaw += (event.clientX - lastClientX) * 0.009;
+      pitch = clamp(pitch + (event.clientY - lastClientY) * 0.009, -1.15, 1.15);
+      lastClientX = event.clientX;
+      lastClientY = event.clientY;
+      updatePlane();
+    }
+  });
+
+  function stopInteraction(event) {
+    if (event.pointerId === activePointer) {
+      mode = null;
+      activePointer = null;
+    }
+  }
+
+  svg.addEventListener('pointerup', stopInteraction);
+  svg.addEventListener('pointercancel', stopInteraction);
+  coeffPoint.addEventListener('keydown', event => {
+    const step = event.shiftKey ? 0.2 : 0.05;
+    if (event.key === 'ArrowLeft') a0 -= step;
+    else if (event.key === 'ArrowRight') a0 += step;
+    else if (event.key === 'ArrowUp') a1 += step;
+    else if (event.key === 'ArrowDown') a1 -= step;
+    else return;
+    event.preventDefault();
+    a0 = clamp(a0, -1.5, 1.5);
+    a1 = clamp(a1, -1.5, 1.5);
+    update();
+  });
+
+  orbitZone.addEventListener('dblclick', () => {
+    yaw = -0.72;
+    pitch = 0.54;
+    updatePlane();
+  });
+
+  affineLineToggle.addEventListener('click', () => {
+    affineLineVisible = !affineLineVisible;
+    affineLineToggle.setAttribute('aria-pressed', String(affineLineVisible));
+    affineLineGroup.style.display = affineLineVisible ? '' : 'none';
+    updateAffineLine();
+  });
+
+  function renderHammingCoordinate(index) {
+    const matches = hammingU[index] === hammingV[index];
+    const entries = [hammingUEntries[index], hammingVEntries[index]];
+    entries.forEach(entry => {
+      entry.classList.toggle('is-match', matches);
+      entry.classList.toggle('is-mismatch', !matches);
+    });
+    const relation = hammingRelations[index];
+    relation.className = 'hamming-relation';
+    relation.textContent = '';
+    if (matches) {
+      relation.classList.add('is-match');
+    } else {
+      relation.classList.add('is-mismatch');
+      relation.textContent = '×';
+    }
+  }
+
+  function updateHammingResult() {
+    const distance = hammingU.reduce((total, value, index) => total + Number(value !== hammingV[index]), 0);
+    hammingResult.innerHTML = `d<sub>H</sub>(u,v) = <strong>${distance}</strong>`;
+  }
+
+  function randomizeHammingVectors() {
+    hammingU = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10));
+    const indices = [0, 1, 2, 3, 4, 5];
+    for (let index = indices.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(Math.random() * (index + 1));
+      [indices[index], indices[swap]] = [indices[swap], indices[index]];
+    }
+    const mismatchCount = 2 + Math.floor(Math.random() * 4);
+    const mismatches = new Set(indices.slice(0, mismatchCount));
+    hammingV = hammingU.map((value, index) => mismatches.has(index)
+      ? (value + 1 + Math.floor(Math.random() * 9)) % 10
+      : value);
+    hammingUEntries.forEach((entry, index) => {
+      entry.textContent = hammingU[index];
+    });
+    hammingVEntries.forEach((entry, index) => {
+      entry.textContent = hammingV[index];
+    });
+    hammingRelations.forEach((relation, index) => renderHammingCoordinate(index));
+    updateHammingResult();
+  }
+
+  hammingRandomize.addEventListener('click', randomizeHammingVectors);
+
+  function formatPolynomial(coefficients) {
+    const terms = [];
+    for (let degree = coefficients.length - 1; degree >= 0; degree -= 1) {
+      const coefficient = coefficients[degree] % 7;
+      if (coefficient === 0) continue;
+      if (degree === 0) terms.push(String(coefficient));
+      else if (degree === 1) terms.push(`${coefficient === 1 ? '' : coefficient}X`);
+      else terms.push(`${coefficient === 1 ? '' : coefficient}X<sup>${degree}</sup>`);
+    }
+    return terms.join(' + ') || '0';
+  }
+
+  function nearbyQuadratics(point, maximumErrors) {
+    return quadraticCodewords.map(codeword => {
+      const bits = point.word.map((value, index) => Number(value === codeword.word[index]));
+      const errors = bits.reduce((total, bit) => total + Number(bit === 0), 0);
+      return { ...codeword, bits, errors };
+    }).filter(codeword => codeword.errors <= maximumErrors)
+      .sort((left, right) => left.errors - right.errors || left.coeff.join('').localeCompare(right.coeff.join('')));
+  }
+
+  function showAgreementDetail(lambdaIndex, codeword) {
+    const point = agreementData[lambdaIndex];
+    const familyCoefficients = familyF0.map((value, index) => (value + point.lambda * familyF1[index]) % 7);
+    familyPointPolynomial.innerHTML = `f<sub>${point.lambda}</sub>(X) = ${formatPolynomial(familyCoefficients)}`;
+    familyPointWord.innerHTML = `ev(f<sub>${point.lambda}</sub>) = (${point.word.join(', ')})`;
+    familyCodeword.innerHTML = `p(X) = ${formatPolynomial(codeword.coeff)}`;
+    familyCodewordWord.innerHTML = `ev(p) = (${codeword.word.join(', ')})`;
+    const supportNumber = Number.parseInt(codeword.bits.join(''), 2);
+    familySupportDetail.innerHTML = `S<sub>${supportNumber}</sub> = {${codeword.bits.join(', ')}}`;
+    document.querySelectorAll('.support-literal').forEach(button => button.classList.remove('is-selected'));
+    const selected = document.querySelector(`[data-support-lambda="${point.lambda}"][data-support-coeff="${codeword.coeff.join('-')}"]`);
+    if (selected) selected.classList.add('is-selected');
+  }
+
+  function buildAgreementFamily() {
+    const maximumErrors = Number(etaErrors.value);
+    etaValue.textContent = `${maximumErrors}/7`;
+    familySupportColumns.replaceChildren();
+    familyAxis.replaceChildren();
+    let firstNearby = null;
+    agreementData.forEach((point, lambdaIndex) => {
+      const column = document.createElement('div');
+      column.className = 'family-support-column';
+      const nearby = nearbyQuadratics(point, maximumErrors);
+      if (nearby.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'support-empty';
+        empty.textContent = '∅';
+        column.appendChild(empty);
+      }
+      nearby.forEach((codeword, codewordIndex) => {
+        if (!firstNearby) firstNearby = { lambdaIndex, codeword };
+        const support = document.createElement('button');
+        support.type = 'button';
+        support.className = 'support-literal';
+        support.dataset.supportLambda = point.lambda;
+        support.dataset.supportCoeff = codeword.coeff.join('-');
+        const supportNumber = Number.parseInt(codeword.bits.join(''), 2);
+        support.innerHTML = `S<sub>${supportNumber}</sub>`;
+        support.setAttribute('aria-label', `At lambda ${point.lambda}, codeword ${codewordIndex + 1}, agreement support ${codeword.bits.join(', ')}`);
+        support.addEventListener('click', () => showAgreementDetail(lambdaIndex, codeword));
+        column.appendChild(support);
+      });
+      familySupportColumns.appendChild(column);
+
+      const scalar = document.createElement('span');
+      scalar.className = 'family-scalar';
+      scalar.textContent = point.lambda;
+      familyAxis.appendChild(scalar);
+    });
+    if (firstNearby) {
+      showAgreementDetail(firstNearby.lambdaIndex, firstNearby.codeword);
+    } else {
+      familyPointPolynomial.innerHTML = `B(f<sub>λ</sub>, η) ∩ RS(𝔽₇, ℒ, 3) = ∅`;
+      familyPointWord.textContent = '';
+      familyCodeword.textContent = '';
+      familyCodewordWord.textContent = '';
+      familySupportDetail.textContent = '';
+    }
+  }
+
+  etaErrors.addEventListener('input', buildAgreementFamily);
+
+  update();
+  randomizeHammingVectors();
+  buildAgreementFamily();
+})();
+</script>
+
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+    tabsets.forEach(function(tabset) {
+      const tabby = new Tabby('#' + tabset.id);
+    });
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button,
+          { trigger: "manual",
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config);
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined;
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              }
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            }
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+
+
+
+
+<script src="index_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

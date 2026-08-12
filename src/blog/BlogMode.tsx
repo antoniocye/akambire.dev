@@ -76,7 +76,12 @@ function BlogPostCard({
   post: BlogPost
   onOpenMarkdown: (slug: string) => void
 }) {
-  const badge = post.kind === 'markdown' ? 'Post' : 'PDF'
+  const badge =
+    post.kind === 'markdown'
+      ? 'Post'
+      : post.kind === 'pdf'
+        ? 'PDF'
+        : 'Interactive post'
   const excerpt =
     post.kind === 'markdown'
       ? post.summary ??
@@ -84,15 +89,16 @@ function BlogPostCard({
           const plain = post.body.replace(/\s+/g, ' ').trim()
           return plain.length > 140 ? `${plain.slice(0, 140)}…` : plain
         })()
-      : post.description ?? 'PDF document'
+      : post.description ??
+        (post.kind === 'pdf' ? 'PDF document' : 'Interactive notebook')
 
-  if (post.kind === 'pdf') {
+  if (post.kind !== 'markdown') {
     return (
       <a
         href={post.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="blog-card blog-card--pdf-link"
+        className="blog-card blog-card--external-link"
       >
         <span className="blog-card-badge">{badge}</span>
         <h3 className="blog-card-title">{post.title}</h3>
@@ -100,7 +106,9 @@ function BlogPostCard({
           {formatDate(post.date)}
         </time>
         <p className="blog-card-excerpt">{excerpt}</p>
-        <span className="blog-card-cta">Open PDF →</span>
+        <span className="blog-card-cta">
+          {post.kind === 'pdf' ? 'Open PDF →' : 'Open notebook →'}
+        </span>
       </a>
     )
   }
@@ -187,22 +195,22 @@ function MarkdownReader({
 export function BlogMode({ selectedSlug, onSelectSlug }: BlogModeProps) {
   const posts = useMemo(() => getAllPosts(), [])
   const [query, setQuery] = useState('')
-  const openedPdfSlugRef = useRef<string | null>(null)
+  const openedLinkedSlugRef = useRef<string | null>(null)
 
-  /** PDFs open in a new tab; clear hash/deep-link state so we stay on the index */
+  /** Linked posts open in a new tab; clear hash/deep-link state so we stay on the index */
   useEffect(() => {
     if (!selectedSlug) {
-      openedPdfSlugRef.current = null
+      openedLinkedSlugRef.current = null
       return
     }
     const post = posts.find((p) => p.slug === selectedSlug)
-    if (!post || post.kind !== 'pdf') {
+    if (!post || post.kind === 'markdown') {
       return
     }
-    if (openedPdfSlugRef.current === selectedSlug) {
+    if (openedLinkedSlugRef.current === selectedSlug) {
       return
     }
-    openedPdfSlugRef.current = selectedSlug
+    openedLinkedSlugRef.current = selectedSlug
     window.open(post.url, '_blank', 'noopener,noreferrer')
     onSelectSlug(null)
   }, [selectedSlug, posts, onSelectSlug])

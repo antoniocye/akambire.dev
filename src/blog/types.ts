@@ -15,3 +15,11 @@ export type BlogPost =
       url: string
       description?: string
     }
+  | {
+      kind: 'interactive'
+      slug: string
+      title: string
+      date: string
+      url: string
+      description?: string
+    }

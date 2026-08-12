@@ -1,0 +1,805 @@
+:root {
+  --ink: #192033;
+  --paper: #f7f5ef;
+  --affine-red: #c53f35;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  margin: 0;
+}
+
+a,
+a:visited {
+  color: inherit;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .14em;
+}
+
+#quarto-content,
+main.content {
+  margin: 0;
+  max-width: none;
+  padding: 0;
+}
+
+.notebook {
+  color: var(--ink);
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 28px 42px 48px;
+}
+
+h1 {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 500;
+  letter-spacing: -.025em;
+  margin: 0 0 12px;
+}
+
+.rs-heading {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-weight: 500;
+  margin: 16px 0 4px;
+  text-align: center;
+}
+
+.equation-section {
+  align-items: center;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  overflow-x: auto;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.equation-section .math.display {
+  color: var(--ink);
+  font-size: clamp(.9rem, 2vw, 1.4rem);
+  margin: 12px 0;
+  width: 100%;
+}
+
+.equation-section + .equation-section {
+  padding-top: 20px;
+}
+
+.equation-section:nth-child(2) .math.display:last-child {
+  font-size: clamp(.78rem, 1.55vw, 1.1rem);
+}
+
+.final-equation .math.display {
+  font-size: clamp(.85rem, 2vw, 1.45rem);
+}
+
+.proximity-section {
+  color: var(--ink);
+  margin-top: 34px;
+  padding: 12px 0 26px;
+}
+
+.proximity-section h1 {
+  margin-bottom: 8px;
+}
+
+.map-formula {
+  color: var(--ink);
+  font-size: clamp(.78rem, 1.5vw, 1rem);
+  overflow-x: auto;
+  text-align: center;
+}
+
+.map-shell {
+  color: var(--ink);
+  margin-top: 4px;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.map-option-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 2px -14px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.affine-line-toggle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--affine-red);
+  border-radius: 0;
+  color: var(--affine-red);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  gap: 7px;
+  padding: 5px 8px;
+}
+
+.affine-line-toggle span {
+  border-top: 2px solid var(--affine-red);
+  display: block;
+  width: 16px;
+}
+
+.affine-line-toggle[aria-pressed="true"] {
+  background: var(--affine-red);
+  color: var(--paper);
+}
+
+.affine-line-toggle[aria-pressed="true"] span {
+  border-top-color: var(--paper);
+}
+
+.affine-line-toggle:focus-visible {
+  outline: 2px solid var(--affine-red);
+  outline-offset: 2px;
+}
+
+.map-svg {
+  color: var(--ink);
+  display: block;
+  height: auto;
+  min-width: 880px;
+  touch-action: none;
+  width: 100%;
+}
+
+.map-svg text {
+  fill: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+
+.map-svg marker path {
+  fill: var(--ink);
+}
+
+.interaction-zone,
+.orbit-zone {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.orbit-zone {
+  cursor: grab;
+}
+
+.orbit-zone:active {
+  cursor: grabbing;
+}
+
+.grid-line {
+  stroke: var(--ink);
+  stroke-opacity: .12;
+  stroke-width: 1;
+}
+
+.axis-line,
+.map-arrow-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-width: 1.4;
+}
+
+.axis-negative {
+  stroke-dasharray: 4 5;
+  stroke-opacity: .42;
+}
+
+.map-arrow-line {
+  stroke-width: 2.2;
+}
+
+.vector-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-width: 4;
+}
+
+.space-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.axis-label,
+.point-label,
+.plane-label {
+  font-size: 15px;
+}
+
+.ambient-affine-line {
+  pointer-events: none;
+  stroke: var(--affine-red);
+  stroke-linecap: round;
+  stroke-width: 2.4;
+}
+
+.affine-point {
+  cursor: grab;
+  fill: var(--affine-red);
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+
+.affine-point:active {
+  cursor: grabbing;
+}
+
+.affine-point-label {
+  fill: var(--affine-red) !important;
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.map-label {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.code-plane {
+  fill: var(--ink);
+  fill-opacity: .055;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.plane-grid-line {
+  stroke: var(--ink);
+  stroke-opacity: .18;
+  stroke-width: 1;
+}
+
+.plane-grid-axis {
+  stroke-opacity: .38;
+  stroke-width: 1.25;
+}
+
+.origin-point {
+  fill: var(--ink);
+  stroke: var(--ink);
+}
+
+.drag-point {
+  cursor: grab;
+  fill: transparent;
+  pointer-events: all;
+  stroke: none;
+}
+
+.drag-point:active {
+  cursor: grabbing;
+}
+
+.drag-point:focus-visible {
+  outline: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.plane-label {
+  font-weight: 600;
+  text-anchor: end;
+}
+
+.map-readout {
+  color: var(--ink);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  gap: 10px 36px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.hamming-section {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.hamming-section h2 {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-weight: 500;
+  margin: 0 0 14px;
+}
+
+.hamming-diagram {
+  align-items: start;
+  display: inline-grid;
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  gap: 18px;
+  grid-template-columns: auto 28px auto;
+}
+
+.hamming-controls {
+  margin-bottom: 12px;
+}
+
+.hamming-randomize {
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
+.hamming-randomize:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.hamming-vector {
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+}
+
+.hamming-vector-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-style: italic;
+}
+
+.hamming-vector-body {
+  display: grid;
+  gap: 3px;
+  padding: 8px 13px;
+  position: relative;
+}
+
+.hamming-vector-body::before,
+.hamming-vector-body::after {
+  border-bottom: 2px solid var(--ink);
+  border-top: 2px solid var(--ink);
+  bottom: 0;
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 7px;
+}
+
+.hamming-vector-body::before {
+  border-left: 2px solid var(--ink);
+  left: 0;
+}
+
+.hamming-vector-body::after {
+  border-right: 2px solid var(--ink);
+  right: 0;
+}
+
+.hamming-entry {
+  align-items: center;
+  background: transparent;
+  border: 1.5px solid transparent;
+  color: var(--ink);
+  display: flex;
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+}
+
+.hamming-entry.is-match {
+  border-color: var(--ink);
+}
+
+.hamming-entry.is-mismatch {
+  border-color: var(--affine-red);
+  color: var(--affine-red);
+  font-weight: 600;
+}
+
+.hamming-relations {
+  display: grid;
+  gap: 3px;
+  grid-template-rows: 24px repeat(6, 34px);
+}
+
+.hamming-relation {
+  align-items: center;
+  display: flex;
+  height: 34px;
+  justify-content: center;
+  width: 28px;
+}
+
+.hamming-relation.is-match::before {
+  border: 1.5px solid var(--ink);
+  content: "";
+  height: 12px;
+  width: 12px;
+}
+
+.hamming-relation.is-mismatch {
+  color: var(--affine-red);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  line-height: 1;
+}
+
+.hamming-result {
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  margin-top: 10px;
+}
+
+.hamming-result strong {
+  color: var(--affine-red);
+  font-weight: 600;
+}
+
+.hamming-section .math.display {
+  color: var(--ink);
+  font-size: clamp(.82rem, 1.6vw, 1.08rem);
+  margin: 15px 0 0;
+  overflow-x: auto;
+}
+
+.agreement-section {
+  margin-top: 34px;
+  text-align: center;
+}
+
+.agreement-section h2 {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-weight: 500;
+  margin: 0 0 14px;
+}
+
+.agreement-section .math.display {
+  color: var(--ink);
+  font-size: clamp(.72rem, 1.25vw, .94rem);
+  margin: 8px 0 19px;
+  overflow-x: auto;
+}
+
+.eta-control {
+  align-items: center;
+  color: var(--ink);
+  display: flex;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  gap: 10px;
+  justify-content: center;
+  margin: -5px 0 17px;
+}
+
+.eta-control output {
+  display: inline-block;
+  min-width: 25px;
+}
+
+.eta-control input {
+  accent-color: var(--affine-red);
+  cursor: pointer;
+  width: 155px;
+}
+
+.affine-family-scroll {
+  overflow: visible;
+  padding: 2px 0;
+}
+
+.affine-family {
+  margin: 0 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.family-support-columns,
+.family-axis {
+  display: grid;
+  gap: clamp(2px, .8vw, 10px);
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.family-support-columns {
+  align-items: end;
+}
+
+.family-support-column {
+  display: grid;
+  gap: 3px;
+}
+
+.support-literal {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: clamp(8.5px, 1vw, 10.5px);
+  line-height: 1.35;
+  padding: 2px 0;
+  white-space: nowrap;
+}
+
+.support-literal sub {
+  font-size: .78em;
+}
+
+.support-literal:hover,
+.support-literal.is-selected {
+  color: var(--affine-red);
+}
+
+.support-literal:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.support-empty {
+  color: color-mix(in srgb, var(--ink) 42%, transparent);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.35;
+  padding: 2px 0;
+}
+
+.family-axis {
+  margin-top: 16px;
+  padding-top: 14px;
+  position: relative;
+}
+
+.family-axis::before {
+  background: var(--ink);
+  content: "";
+  height: 1.5px;
+  left: calc(100% / 14);
+  position: absolute;
+  right: calc(100% / 14);
+  top: 5px;
+}
+
+.family-axis::after {
+  border-bottom: 4px solid transparent;
+  border-left: 8px solid var(--ink);
+  border-top: 4px solid transparent;
+  content: "";
+  position: absolute;
+  right: calc((100% / 14) - 7px);
+  top: 1.8px;
+}
+
+.family-scalar {
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  position: relative;
+}
+
+.family-scalar::before {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  content: "";
+  height: 8px;
+  left: 50%;
+  position: absolute;
+  top: -13px;
+  transform: translateX(-50%);
+  width: 8px;
+}
+
+.family-axis-name {
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  margin-top: 5px;
+}
+
+.family-detail {
+  color: var(--ink);
+  display: grid;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  gap: 3px 22px;
+  grid-template-columns: repeat(2, auto);
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.family-detail > div:nth-child(odd) {
+  text-align: right;
+}
+
+.family-detail > div:nth-child(even) {
+  text-align: left;
+}
+
+.family-support-detail {
+  grid-column: 1 / -1;
+  margin-top: 3px;
+  text-align: center !important;
+}
+
+.comparison-section {
+  margin-top: 38px;
+  text-align: center;
+}
+
+.comparison-section h2 {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-weight: 500;
+  margin: 0 0 15px;
+}
+
+.comparison-section p {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 8px auto;
+  max-width: 820px;
+  text-align: left;
+}
+
+.formal-section {
+  margin-top: 34px;
+  text-align: center;
+}
+
+.formal-section h2 {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+.formal-section .math.display {
+  color: var(--ink);
+  font-size: clamp(.78rem, 1.55vw, 1.12rem);
+  margin: 8px 0;
+  overflow-x: auto;
+}
+
+.epsilon-definitions {
+  margin: 0 auto;
+  max-width: 980px;
+}
+
+.epsilon-definitions p {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  margin: 15px 0 3px;
+}
+
+.epsilon-definitions .math.display {
+  margin: 7px 0;
+}
+
+.grand-mca-statement {
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 20px auto 0;
+  max-width: 900px;
+  text-align: left;
+}
+
+.grand-mca-statement p {
+  margin: 0;
+}
+
+.locator-section {
+  margin-top: 42px;
+  text-align: center;
+}
+
+.locator-section h2 {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-weight: 500;
+  margin: 0 0 14px;
+}
+
+.locator-stage {
+  color: var(--ink);
+  margin: 0 auto 24px;
+  max-width: 980px;
+}
+
+.locator-stage h3 {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 7px;
+}
+
+.locator-stage p {
+  color: var(--ink);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 7px auto;
+  max-width: 850px;
+}
+
+.locator-stage .math.display {
+  color: var(--ink);
+  font-size: clamp(.76rem, 1.45vw, 1.05rem);
+  margin: 8px 0;
+  overflow-x: auto;
+}
+
+.locator-stage p:last-child {
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.locator-next {
+  margin-bottom: 0;
+}
+
+@media (max-width: 700px) {
+  .notebook {
+    padding: 20px 18px 36px;
+  }
+
+  .equation-section {
+    align-items: flex-start;
+    padding: 10px 0;
+  }
+
+  .proximity-section {
+    padding-top: 30px;
+  }
+
+  .hamming-diagram {
+    gap: 11px;
+  }
+
+  .family-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .family-detail > div:nth-child(n) {
+    text-align: center;
+  }
+
+}
